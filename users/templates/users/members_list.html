@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'users/css/members_list.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- 1. ФОН С КАРТИНКОЙ И ЗАГОЛОВКОМ -->
+<div class="members-cover">
+    <div class="members-cover-filter"></div>
+    <h1 class="members-title">Участники</h1>
+</div>
+
+<!-- 2. КНОПКА "ГЛАВНАЯ" -->
+<a href="{% url 'home' %}" class="nav-home-btn">
+    <i class="fas fa-home"></i>
+    Главная
+</a>
+
+<!-- 3. ТАБЛИЦА С СОРТИРУЕМЫМИ ЗАГОЛОВКАМИ -->
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" id="members-table">
+                    <thead>
+                        <tr>
+                            <th width="10%">Аватар</th>
+                            <th width="25%">Участник</th>
+                            <th width="15%">
+                                <button class="sort-btn" data-sort="date_joined" data-current-order="{% if sort_by == 'date_joined' %}{{ order }}{% else %}asc{% endif %}">
+                                    Дата регистрации
+                                    {% if sort_by == 'date_joined' %}
+                                        {% if order == 'asc' %}
+                                            <i class="fas fa-sort-up"></i>
+                                        {% else %}
+                                            <i class="fas fa-sort-down"></i>
+                                        {% endif %}
+                                    {% endif %}
+                                </button>
+                            </th>
+
+                            <th width="15%">
+                                <button class="sort-btn" data-sort="approved_submissions" data-current-order="{% if sort_by == 'approved_submissions' %}{{ order }}{% else %}asc{% endif %}">
+                                    Книг предложил
+                                    {% if sort_by == 'approved_submissions' %}
+                                        {% if order == 'asc' %}
+                                            <i class="fas fa-sort-up"></i>
+                                        {% else %}
+                                            <i class="fas fa-sort-down"></i>
+                                        {% endif %}
+                                    {% endif %}
+                                </button>
+                            </th>
+
+                            <th width="15%">
+                                <button class="sort-btn" data-sort="reviews" data-current-order="{% if sort_by == 'reviews' %}{{ order }}{% else %}asc{% endif %}">
+                                    Рецензий написано
+                                    {% if sort_by == 'reviews' %}
+                                        {% if order == 'asc' %}
+                                            <i class="fas fa-sort-up"></i>
+                                        {% else %}
+                                            <i class="fas fa-sort-down"></i>
+                                        {% endif %}
+                                    {% endif %}
+                                </button>
+                            </th>
+
+                            <th width="15%">
+                                <button class="sort-btn" data-sort="favorites" data-current-order="{% if sort_by == 'favorites' %}{{ order }}{% else %}asc{% endif %}">
+                                    Книг в избранном
+                                    {% if sort_by == 'favorites' %}
+                                        {% if order == 'asc' %}
+                                            <i class="fas fa-sort-up"></i>
+                                        {% else %}
+                                            <i class="fas fa-sort-down"></i>
+                                        {% endif %}
+                                    {% endif %}
+                                </button>
+                            </th>
+                    </thead>
+                    <tbody id="members-table-body">
+                        {% for stats in user_stats %}
+                        <tr>
+                            <!-- Аватар -->
+                            <td>
+                                <a href="{% url 'user_profile' stats.user.id %}">
+                                    {% if stats.user.avatar %}
+                                    <img src="{{ stats.user.avatar.url }}"
+                                         class="rounded-circle"
+                                         width="50" height="50"
+                                         alt="{{ stats.user.get_full_name|default:stats.user.email }}">
+                                    {% else %}
+                                    <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center"
+                                         style="width: 50px; height: 50px;">
+                                        <span class="text-white">
+                                            {{ stats.user.first_name|first|default:stats.user.email|first|upper }}
+                                        </span>
+                                    </div>
+                                    {% endif %}
+                                </a>
+                            </td>
+
+                            <!-- Имя и email -->
+                            <td>
+                                <a href="{% if stats.user == request.user %}{% url 'my_profile' %}{% else %}{% url 'user_profile' stats.user.id %}{% endif %}"
+                                   class="text-decoration-none">
+                                    <strong>{{ stats.user.get_full_name|default:stats.user.email }}</strong>
+                                </a>
+                            </td>
+
+                            <!-- Дата регистрации -->
+                            <td>
+                                {{ stats.user.date_joined|date:"d.m.Y" }}
+                                <div class="small text-muted">
+                                    {{ stats.user.date_joined|timesince }} в клубе
+                                </div>
+                            </td>
+
+                            <!-- Книг предложил -->
+                            <td>
+                                <span class="badge bg-primary">
+                                    {{ stats.approved_submissions_count|default:0 }}
+                                </span>
+                            </td>
+
+                            <!-- Рецензий написано -->
+                            <td>
+                                <span class="badge bg-success">
+                                    {{ stats.reviews_count|default:0 }}
+                                </span>
+                            </td>
+
+                            <!-- Книг в избранном -->
+                            <td>
+                                <span class="badge bg-danger">
+                                    {{ stats.favorite_books_count|default:0 }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-4">
+                                <p class="text-muted">Пока нет участников</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 4. ФУТЕР -->
+<div style="background-color:#171717; color:#ffffff; padding:15px 0; text-align:center; margin-top:40px;">
+    <div class="container">
+        <div class="footer-text">© Киря и Ваня</div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'users/js/members_list.js' %}"></script>
+{% endblock %}

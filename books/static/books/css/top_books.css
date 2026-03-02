@@ -1,0 +1,242 @@
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.table-hover tbody tr:hover {
+    background: rgba(216, 140, 140, 0.05);
+    transition: background 0.3s ease;
+}
+
+.table-dark a:hover {
+    color: #f6c0c0 !important;
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.card {
+    border: none;
+    border-radius: 15px;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+}
+
+.input-group-text {
+    border-radius: 10px 0 0 10px !important;
+}
+
+.form-control {
+    border-radius: 0 10px 10px 0 !important;
+    border: 2px solid #e1e1e1;
+}
+
+.form-control:focus {
+    border-color: #d88c8c !important;
+    box-shadow: 0 0 0 0.25rem rgba(216, 140, 140, 0.25) !important;
+}
+
+.form-select {
+    border: 2px solid #e1e1e1;
+    border-radius: 10px !important;
+}
+
+.form-select:focus {
+    border-color: #d88c8c !important;
+    box-shadow: 0 0 0 0.25rem rgba(216, 140, 140, 0.25) !important;
+}
+
+.badge {
+    padding: 8px 12px;
+    font-weight: 500;
+    border-radius: 8px;
+}
+
+/* Стиль для обложки как в home */
+    .profile-cover {
+        position: relative;
+        height: 250px;
+        background-image: url('https://optim.tildacdn.pub/tild3464-3531-4164-b230-356263373862/-/format/webp/photo_2025-11-29_18-.jpg.webp');
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .profile-cover-filter {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(rgba(197, 177, 177, 0.3), rgba(225, 197, 197, 0.3));
+    }
+
+    .profile-title {
+        font-family: Arial, sans-serif;
+        font-size: 120px;
+        font-weight: bold;
+        text-transform: uppercase;
+        color: #fff;
+        position: relative;
+        z-index: 2;
+
+        margin: 0;
+    }
+
+    .profile-subtitle {
+        font-family: Arial, sans-serif;
+        font-size: 20px;
+        color: #000;
+        position: relative;
+        z-index: 2;
+        margin-top: 15px;
+        text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
+    }
+
+    /* Кнопка "Главная" */
+    .nav-home-btn {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #000000;
+        background-color: #f6c0c0;
+        border: 0px solid #000000;
+        border-radius: 4px;
+        padding: 8px 16px;
+        text-transform: uppercase;
+        text-decoration: none;
+        font-weight: bold;
+        font-family: Arial;
+        transition: all 0.2s;
+    }
+
+    .nav-home-btn:hover {
+        box-shadow: 0px 10px 20px rgba(0, 11, 48, 0.25);
+        text-decoration: none;
+        color: #000000;
+        transform: translateY(-2px);
+    }
+
+    /* Адаптивность для заголовка */
+    @media (max-width: 768px) {
+        .profile-title {
+            font-size: 36px;
+        }
+
+        .profile-subtitle {
+            font-size: 16px;
+        }
+
+        .profile-cover {
+            height: 200px;
+        }
+
+        .nav-home-btn {
+            top: 10px;
+            right: 10px;
+            padding: 6px 12px;
+            font-size: 14px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .profile-title {
+            font-size: 28px;
+        }
+
+        .profile-subtitle {
+            font-size: 14px;
+        }
+
+        .profile-cover {
+            height: 180px;
+        }
+    }
+
+    /* Стили для футера */
+    .profile-footer {
+        background-color: #171717;
+        color: #ffffff;
+        padding: 15px 0;
+        text-align: center;
+        font-size: 14px;
+        font-family: Arial;
+        margin-top: 40px;
+    }
+
+    /* Дополнительные стили для ТОП страницы */
+    .table-dark {
+        background: linear-gradient(135deg, #2c3e50, #1e272e) !important;
+    }
+
+    .table-dark a:hover {
+        color: #f6c0c0 !important;
+        transition: color 0.3s ease;
+    }
+
+    .badge.bg-success {
+        background: linear-gradient(135deg, #28a745, #20c997) !important;
+    }
+
+    .badge.bg-warning {
+        background: linear-gradient(135deg, #ffc107, #fd7e14) !important;
+    }
+
+    .badge.bg-danger {
+        background: linear-gradient(135deg, #dc3545, #c82333) !important;
+    }
+
+    .input-group-text {
+        background: linear-gradient(135deg, #f6c0c0, #d88c8c) !important;
+        color: white !important;
+        border: none !important;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #f6c0c0, #d88c8c) !important;
+        border: none !important;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #d88c8c, #c06b6b) !important;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(216, 140, 140, 0.4);
+    }
+
+    .btn-outline-secondary {
+        border: 2px solid #d88c8c !important;
+        color: #d88c8c !important;
+    }
+
+    .btn-outline-secondary:hover {
+        background: #d88c8c !important;
+        color: white !important;
+    }
+
+    .alert-info {
+        background: linear-gradient(135deg, rgba(246, 192, 192, 0.2), rgba(216, 140, 140, 0.2));
+        border-left: 4px solid #d88c8c;
+        border-top: none;
+        border-right: none;
+        border-bottom: none;
+    }
+
+    .alert-warning {
+        background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(253, 126, 20, 0.1));
+        border-left: 4px solid #ffc107;
+        border-top: none;
+        border-right: none;
+        border-bottom: none;
+    }

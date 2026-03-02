@@ -1,0 +1,312 @@
+    .login-cover {
+        position: relative;
+        min-height: 100vh;
+        background-image: url('https://optim.tildacdn.pub/tild3464-3531-4164-b230-356263373862/-/format/webp/photo_2025-11-29_18-.jpg.webp');
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .login-cover-filter {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(197, 177, 177, 0.4), rgba(225, 197, 197, 0.4));
+        backdrop-filter: blur(3px);
+    }
+
+    /* Контейнер формы */
+    .login-container {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        max-width: 450px;
+        margin: 0 auto;
+    }
+
+    /* Карточка формы */
+    .login-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        padding: 40px 30px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        animation: slideIn 0.5s ease;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Заголовок */
+    .login-title {
+        font-family: Arial, sans-serif;
+        font-size: 36px;
+        font-weight: bold;
+        text-transform: uppercase;
+        color: #333;
+        text-align: center;
+        margin-bottom: 30px;
+        position: relative;
+        padding-bottom: 15px;
+    }
+
+    .login-title:after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 3px;
+        background: linear-gradient(to right, #ff8a8a, #ff6b6b);
+        border-radius: 2px;
+    }
+
+    /* Стили для формы */
+    .login-form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    /* Поля ввода */
+    .login-form input {
+        width: 100%;
+        padding: 14px 18px;
+        border: 2px solid #e1e1e1;
+        border-radius: 12px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .login-form input:focus {
+        border-color: #ff6b6b;
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.1);
+    }
+
+    .login-form input:hover {
+        border-color: #ff8a8a;
+    }
+
+    /* Метки полей */
+    .login-form label {
+        font-weight: 600;
+        color: #555;
+        margin-bottom: 5px;
+        display: block;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* КНОПКА - неактивное состояние (тусклая) */
+    .login-btn {
+        background: linear-gradient(135deg, #c0a0a0, #a08080) !important;
+        color: white !important;
+        border: none !important;
+        padding: 14px 30px !important;
+        font-size: 18px !important;
+        font-weight: bold !important;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border-radius: 12px !important;
+        transition: all 0.3s ease !important;
+        margin-top: 10px;
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    /* КНОПКА - активное состояние (ЯРКАЯ!) */
+    .login-btn.active {
+        background: linear-gradient(135deg, #ff6b6b, #ff4757) !important;
+        opacity: 1;
+        cursor: pointer;
+        box-shadow: 0 8px 20px rgba(255, 71, 87, 0.4);
+        font-weight: 800 !important;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+
+    .login-btn.active:hover {
+        transform: translateY(-3px) !important;
+        box-shadow: 0 15px 30px rgba(255, 71, 87, 0.6) !important;
+        background: linear-gradient(135deg, #ff4757, #ff1e1e) !important;
+    }
+
+    .login-btn.active:active {
+        transform: translateY(-1px) !important;
+    }
+
+    /* ССЫЛКИ - яркие и сочные */
+    .login-links {
+        text-align: center;
+        margin-top: 25px;
+        padding-top: 25px;
+        border-top: 1px solid #e1e1e1;
+    }
+
+    .login-links a {
+        color: #ff4757 !important;  /* Яркий красный */
+        text-decoration: none;
+        font-weight: 700;  /* Жирнее */
+        font-size: 16px;
+        transition: all 0.3s ease;
+        padding: 8px 16px;
+        border-radius: 25px;
+        display: inline-block;
+        text-shadow: 0 1px 2px rgba(255, 71, 87, 0.1);
+    }
+
+    .login-links a:hover {
+        color: #ff1e1e !important;  /* Ещё ярче при наведении */
+        background: rgba(255, 71, 87, 0.1);
+        text-decoration: none;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(255, 71, 87, 0.2);
+    }
+
+    .link-separator {
+        color: #ff4757;
+        margin: 0 10px;
+        font-weight: 700;
+        font-size: 16px;
+    }
+
+    /* Сообщения об ошибках */
+    .error-message {
+        background: #ffebee;
+        color: #c62828;
+        padding: 12px 18px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        border-left: 4px solid #c62828;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .error-message:before {
+        content: '⚠️';
+        font-size: 18px;
+    }
+
+    /* Разделитель */
+    .form-divider {
+        margin: 20px 0;
+        position: relative;
+        text-align: center;
+    }
+
+    .form-divider hr {
+        border: none;
+        border-top: 1px solid #e1e1e1;
+        margin: 0;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .login-card {
+            padding: 30px 20px;
+        }
+
+        .login-title {
+            font-size: 28px;
+        }
+
+        .login-form input {
+            padding: 12px 16px;
+            font-size: 15px;
+        }
+
+        .login-btn {
+            padding: 12px 24px !important;
+            font-size: 16px !important;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .login-card {
+            padding: 25px 15px;
+        }
+
+        .login-title {
+            font-size: 24px;
+        }
+
+        .login-links a {
+            display: inline-block;
+            margin: 5px 0;
+        }
+
+        .link-separator {
+            display: none;
+        }
+    }
+
+    /* Анимация загрузки для кнопки */
+    .login-btn.loading {
+        pointer-events: none;
+        opacity: 0.8;
+    }
+
+    .login-btn.loading:after {
+        content: '';
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        top: 50%;
+        right: 20px;
+        transform: translateY(-50%);
+        border: 2px solid white;
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: translateY(-50%) rotate(360deg); }
+    }
+
+    /* Кнопка "Главная" */
+    .nav-home-btn {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #000000;
+        background-color: #f6c0c0;
+        border: 0px solid #000000;
+        border-radius: 4px;
+        padding: 8px 16px;
+        text-transform: uppercase;
+        text-decoration: none;
+        font-weight: bold;
+        font-family: Arial;
+        transition: all 0.2s;
+    }
+
+    .nav-home-btn:hover {
+        box-shadow: 0px 10px 20px rgba(0, 11, 48, 0.25);
+        text-decoration: none;
+        color: #000000;
+        transform: translateY(-2px);
+    }

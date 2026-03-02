@@ -1,0 +1,21 @@
+    /* Стили для кадрирования */
+    .crop-container {
+        max-width: 400px;
+        max-height: 400px;
+        margin: 20px auto;
+        border: 2px dashed #ccc;
+        display: none;
+    }
+    .crop-preview {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 2px solid #007bff;
+        margin: 10px auto;
+        display: none;
+    }
+    .crop-controls {
+        display: none;
+        margin-top: 10px;
+    }

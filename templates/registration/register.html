@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/register.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- Основной фон с картинкой -->
+<div class="register-cover">
+    <div class="register-cover-filter"></div>
+
+    <!-- Контейнер формы -->
+    <div class="register-container">
+        <div class="register-card">
+            <h1 class="register-title">Регистрация</h1>
+
+            <!-- Ошибки формы -->
+            {% if form.errors %}
+                <div class="error-message">
+                    Пожалуйста, исправьте ошибки ниже
+                </div>
+            {% endif %}
+
+            <!-- Форма регистрации - ПРОСТАЯ КАК В ОРИГИНАЛЕ -->
+            <form action="{% url 'register' %}" method="post" class="register-form" id="registerForm">
+                {% csrf_token %}
+
+                <!-- Поля формы - просто выводим как есть -->
+                {{ form }}
+
+                <div class="form-divider">
+                    <hr>
+                </div>
+
+                <!-- Кнопка регистрации -->
+                <button type="submit" class="btn register-btn" id="registerBtn" disabled>
+                    ✨ Зарегистрироваться
+                </button>
+            </form>
+
+            <!-- Ссылки -->
+            <div class="register-links">
+                <span class="text-muted">Уже есть аккаунт?</span>
+                <a href="{% url 'login' %}">🔑 Войти</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Кнопка "Главная" -->
+<a href="{% url 'home' %}" class="nav-home-btn">
+    <i class="fas fa-home"></i>
+    Главная
+</a>
+
+<!-- Футер -->
+<div class="profile-footer">
+    © Киря и Ваня
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/register.js' %}"></script>
+{% endblock %}

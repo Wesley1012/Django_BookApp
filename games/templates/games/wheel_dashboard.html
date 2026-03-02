@@ -1,0 +1,247 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Колесо Фортуны{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'games/css/wheel.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- ШАПКА С КАРТИНКОЙ -->
+<div class="profile-cover">
+    <div class="profile-cover-filter"></div>
+    <div>
+        <h1 class="profile-title">Колесо Фортуны</h1>
+    </div>
+</div>
+
+<!-- КНОПКА "ГЛАВНАЯ" -->
+<a href="{% url 'home' %}" class="nav-home-btn">
+    <i class="fas fa-home"></i>
+    Главная
+</a>
+
+<!-- ОСНОВНОЙ КОНТЕНТ КОЛЕСА -->
+<div class="container-fluid mt-4">
+    <div class="row">
+        <!-- Левая колонка - управление темами -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Управление темами</h3>
+                </div>
+                <div class="card-body">
+                    <!-- Форма добавления темы -->
+                    <form method="post" class="mb-4">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="add_theme">
+
+                        <div class="mb-3">
+                            <label class="form-label">Название темы (макс. 45 символов)</label>
+                            <input type="text" name="name" class="form-control" required
+                                   placeholder="Введите название" maxlength="45">
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label class="form-label">Цвет</label>
+                                <input type="color" name="color" class="form-control form-control-color" value="#3498db">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Вероятность: <span id="probValue">1.0</span>%</label>
+                                <div class="probability-input-group">
+                                    <input type="range" name="probability" class="form-range probability-slider flex-grow-1"
+                                           min="0" max="100" step="0.1" value="1.0" id="probSlider">
+                                    <input type="number" class="probability-number-input" id="probNumber"
+                                           min="0" max="100" step="0.1" value="1.0">
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Добавить тему</button>
+                    </form>
+
+                    <hr>
+
+                    <!-- Табы для тем -->
+                    <ul class="nav nav-tabs" id="themeTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="active-tab" data-bs-toggle="tab" data-bs-target="#active" type="button" role="tab">
+                                Активные ({{ active_themes_count }})
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="eliminated-tab" data-bs-toggle="tab" data-bs-target="#eliminated" type="button" role="tab">
+                                Выбывшие ({{ eliminated_themes_count }})
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="themeTabsContent">
+                        <!-- Активные темы -->
+                        <div class="tab-pane fade show active" id="active" role="tabpanel">
+                            <div id="activeThemesList">
+                                {% for theme in all_themes %}
+                                    {% if theme.is_active %}
+                                        <div class="theme-item" style="background-color: {{ theme.color }}20; border-left: 4px solid {{ theme.color }};">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div class="d-flex align-items-start" style="max-width: 70%;">
+                                                    <span class="color-preview" style="background-color: {{ theme.color }}; flex-shrink: 0; margin-top: 3px;"></span>
+                                                    <strong style="margin-left: 8px;">
+                                                        {{ theme.name }}
+                                                    </strong>
+                                                    <span class="theme-probability ms-2">{{ theme.probability }}%</span>
+                                                </div>
+                                                <div class="d-flex align-items-center flex-shrink-0">
+                                                    <form method="post" style="display: inline;">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="action" value="delete_theme">
+                                                        <input type="hidden" name="theme_id" value="{{ theme.id }}">
+                                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Удалить навсегда?')" title="Удалить навсегда">
+                                                            ×
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+
+                                            <div class="mt-2">
+                                                <div class="probability-input-group">
+                                                    <input type="range" class="form-range probability-update flex-grow-1"
+                                                           data-theme-id="{{ theme.id }}"
+                                                           min="0" max="100" step="0.1" value="{{ theme.probability }}">
+                                                    <input type="number" class="probability-number-input theme-probability-number"
+                                                           data-theme-id="{{ theme.id }}"
+                                                           min="0" max="100" step="0.1" value="{{ theme.probability }}">
+                                                </div>
+                                                <small class="text-muted">Введите число или используйте ползунок</small>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                {% empty %}
+                                    <p class="text-muted">Темы не добавлены</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Выбывшие темы -->
+                        <div class="tab-pane fade" id="eliminated" role="tabpanel">
+                            <div id="eliminatedThemesList">
+                                {% for theme in all_themes %}
+                                    {% if not theme.is_active %}
+                                        <div class="theme-item eliminated-theme" style="background-color: {{ theme.color }}10; border-left: 4px solid #ccc;">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div class="d-flex align-items-start" style="max-width: 60%;">
+                                                    <span class="color-preview" style="background-color: {{ theme.color }}; opacity: 0.5; flex-shrink: 0; margin-top: 3px;"></span>
+                                                    <strong style="margin-left: 8px;">
+                                                        {{ theme.name }}
+                                                    </strong>
+                                                    <span class="text-muted ms-2">{{ theme.probability }}%</span>
+                                                </div>
+                                                <div>
+                                                    <form method="post" style="display: inline;">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="action" value="restore_theme">
+                                                        <input type="hidden" name="theme_id" value="{{ theme.id }}">
+                                                        <button type="submit" class="btn btn-sm btn-success" title="Вернуть в игру">
+                                                            ↺
+                                                        </button>
+                                                    </form>
+                                                    <form method="post" style="display: inline;">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="action" value="delete_theme">
+                                                        <input type="hidden" name="theme_id" value="{{ theme.id }}">
+                                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Удалить навсегда?')" title="Удалить навсегда">
+                                                            ×
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                {% empty %}
+                                    <p class="text-muted">Нет выбывших тем</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Центральная колонка - колесо -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3>Вращайте колесо!</h3>
+                        <div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="eliminationToggle"
+                                       {% if config.is_elimination_active %}checked{% endif %}>
+                                <label class="form-check-label" for="eliminationToggle">
+                                    <strong>Режим навыбывание</strong>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body text-center">
+                    <!-- Индикатор режима навыбывание -->
+                    {% if config.is_elimination_active %}
+                    <div class="alert alert-warning mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>🎯 Режим навыбывание активен!</strong>
+                                <br>
+                                <small>Раунд: {{ config.elimination_round }} | Осталось тем: {{ active_themes_count }}</small>
+                            </div>
+                            <button class="btn btn-sm btn-outline-danger" id="resetEliminationBtn">
+                                Сбросить
+                            </button>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="wheel-container">
+                        <div class="arrow"></div>
+                        <canvas id="wheelCanvas" width="800" height="800"></canvas>
+
+
+                    </div>
+
+                    <!-- Результат вращения (теперь над кнопкой) -->
+                    <div id="result" class="alert" style="display: none;"></div>
+
+                    <!-- Кнопка вращения -->
+                    <div class="text-center">
+                        <button id="spinButton" class="btn btn-primary btn-lg"
+                                {% if not active_themes_count %}disabled{% endif %}>
+                            <span id="spinText">🎯 Крутить колесо!</span>
+                            <span id="spinSpinner" class="spinner-border spinner-border-sm" style="display: none;"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Глобальные переменные для JS -->
+<script>
+window.csrftoken = '{{ csrf_token }}';
+window.wheelData = {{ wheel_data|safe }};
+window.config = {
+    is_elimination_active: {{ config.is_elimination_active|yesno:"true,false" }},
+    elimination_round: {{ config.elimination_round }}
+};
+window.activeThemesCount = {{ active_themes_count }};
+window.updateProbabilityUrl = '{% url "update_probability" %}';
+window.spinResultUrl = '{% url "spin_result" %}';
+</script>
+<!-- Подключаем внешний JS файл -->
+<script src="{% static 'games/js/wheel.js' %}"></script>
+{% endblock %}

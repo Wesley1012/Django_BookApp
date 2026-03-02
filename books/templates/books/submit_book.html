@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'books/css/submit_book.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- ШАПКА С КАРТИНКОЙ -->
+<div class="profile-cover">
+    <div class="profile-cover-filter"></div>
+    <div>
+        <h1 class="profile-title">Предложка</h1>
+        <div class="profile-subtitle">
+            Здесь вы можете предложить книгу для добавления на сайт
+        </div>
+    </div>
+</div>
+
+<!-- КНОПКА "ГЛАВНАЯ" -->
+<a href="{% url 'home' %}" class="nav-home-btn">
+    <i class="fas fa-home"></i>
+    Главная
+</a>
+
+<!-- ОСНОВНОЙ КОНТЕНТ ФОРМЫ -->
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">📚 Заполните информацию о книге</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" id="bookForm">
+                        {% csrf_token %}
+
+                        <!-- Основная информация -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Название книги *</label>
+                                    {{ form.title }}
+                                    {% if form.title.errors %}
+                                    <div class="text-danger small">{{ form.title.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Автор *</label>
+                                    {{ form.author }}
+                                    {% if form.author.errors %}
+                                    <div class="text-danger small">{{ form.author.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label class="form-label">{{ form.genre.label }}</label>
+                                    {{ form.genre }}
+                                    <div class="form-text">{{ form.genre.help_text }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Описание книги *</label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                            <div class="text-danger small">{{ form.description.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Ваша рецензия (опционально)</label>
+                            {{ form.review }}
+                            <div class="form-text">Поделитесь вашим мнением о книге</div>
+                        </div>
+
+                        <!-- Обложка -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Обложка книги</label>
+                                    {{ form.cover }}
+                                    <div class="form-text">Загрузите изображение обложки</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Или ссылка на обложку</label>
+                                    {{ form.cover_url }}
+                                    <div class="form-text">Можно указать URL вместо загрузки файла</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Оценки -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <div class="form-check form-switch">
+                                    {{ form.want_rating }}
+                                    <label class="form-check-label" for="{{ form.want_rating.id_for_label }}">
+                                        <strong>⭐ Хочу оценить книгу</strong>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="card-body" id="ratingSection">
+                                <div class="row">
+
+                                    <!-- Персонажи -->
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">
+                                            Прописанность персонажей
+                                            <span id="characters_value" class="badge bg-primary ms-2">0</span>
+                                        </label>
+                                        <input type="range" name="characters_rating" class="form-range" min="0" max="10" value="0"
+                                               oninput="updateValue('characters', this.value); calculateTotal()">
+                                    </div>
+                                                     <!-- Сюжет -->
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">
+                                            Раскрытие авторской идеи
+                                            <span id="plot_value" class="badge bg-primary ms-2">0</span>
+                                        </label>
+                                        <input type="range" name="plot_rating" class="form-range" min="0" max="10" value="0"
+                                               oninput="updateValue('plot', this.value); calculateTotal()">
+                                    </div>
+
+
+                                    <!-- Стиль -->
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">
+                                            Читаемость
+                                            <span id="style_value" class="badge bg-primary ms-2">0</span>
+                                        </label>
+                                        <input type="range" name="style_rating" class="form-range" min="0" max="10" value="0"
+                                               oninput="updateValue('style', this.value); calculateTotal()">
+                                    </div>
+
+                                    <!-- Оригинальность -->
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">
+                                            Актуальность
+                                            <span id="originality_value" class="badge bg-primary ms-2">0</span>
+                                        </label>
+                                        <input type="range" name="originality_rating" class="form-range" min="0" max="10" value="0"
+                                               oninput="updateValue('originality', this.value); calculateTotal()">
+                                    </div>
+
+                                    <!-- Впечатление -->
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">
+                                            Общее впечатление
+                                            <span id="impression_value" class="badge bg-primary ms-2">0</span>
+                                        </label>
+                                        <input type="range" name="impression_rating" class="form-range" min="0" max="10" value="0"
+                                               oninput="updateValue('impression', this.value); calculateTotal()">
+                                    </div>
+
+                                    <!-- Итоговая оценка -->
+                                    <div class="col-md-6 mb-3">
+                                        <div class="card h-100 bg-light">
+                                            <div class="card-body text-center">
+                                                <h6 class="card-title">Общая оценка</h6>
+                                                <div class="display-4 text-primary" id="total_rating">0.0</div>
+                                                <div class="text-muted">из 10</div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Избранное -->
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <div class="form-check form-switch">
+                                    {{ form.is_favorite }}
+                                    <label class="form-check-label" for="{{ form.is_favorite.id_for_label }}">
+                                        <strong>❤️ Добавить в мои любимые книги</strong>
+                                    </label>
+                                    <div class="form-text">Книга появится в вашем личном кабинете</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Кнопки -->
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                📨 Отправить на модерацию
+                            </button>
+                            <a href="{% url 'home' %}" class="btn btn-secondary">Отмена</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ФУТЕР -->
+<div class="profile-footer">
+    © Киря и Ваня
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'books/js/submit_book.js' %}"></script>
+{% endblock %}

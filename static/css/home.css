@@ -1,0 +1,467 @@
+/* static/css/home.css */
+
+/* Копируем стили Tilda для главной страницы */
+.t-rec { position: relative; }
+
+/* Секция навигации */
+.t393 {
+    position: fixed !important;
+    z-index: 1000;
+    top: 20px;
+    right: 20px;
+}
+
+.t393__wrapper {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.t393_btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+}
+
+/* Обложка */
+.t-cover {
+    position: relative;
+    height: 948px;
+    background-size: cover;
+    background-position: center;
+    background-attachment: scroll;
+}
+
+.t-cover__carrier {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+}
+
+.t-cover__filter {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: linear-gradient(rgba(197, 177, 177, 0.3), rgba(225, 197, 197, 0.3));
+}
+
+.t-cover__wrapper {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.t-container {
+    width: 100%;
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+.t-col_12 {
+    width: 100%;
+}
+
+/* Текст на обложке */
+.t102 {
+    text-align: center;
+    color: #fff;
+}
+
+.t102__title {
+    font-family: Arial, sans-serif;
+    font-size: 120px;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    line-height: 1.2;
+}
+
+.t102__descr {
+    font-family: Arial, sans-serif;
+    font-size: 34px;
+    font-weight: bold;
+    line-height: 1.3;
+}
+
+.space {
+    display: block;
+    height: 40px;
+}
+
+/* Блоки с кнопками */
+.t1331 {
+    padding: 30px 0;
+}
+
+.t1331__row {
+    display: flex;
+    justify-content: center;
+    gap: 1px;
+}
+
+.t1331__row_center {
+    justify-content: center;
+}
+
+/* Кнопки в стиле Tilda */
+.t-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    transition: all 0.2s ease-in-out;
+    text-transform: uppercase;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    overflow: hidden;
+    isolation: isolate;
+}
+
+.t-btnflex {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.t-btnflex__icon {
+    width: 20px;
+    height: 20px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.t-btnflex__text {
+    display: inline-block;
+}
+
+.t-btnflex_md {
+    padding: 12px 30px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 3px solid #000000 !important;
+}
+
+/* Специфичные стили для кнопки выхода */
+#rec1855442171 .t-btnflex.t-btnflex_type_button {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: #000;
+    background-color: #f6c0c0;
+    border-style: solid !important;
+    border-color: #000000 !important;
+    height: 60px;
+    width: 60px;
+    --border-width: 0px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    transition-duration: 0.2s;
+    transition-property: background-color, color, border-color, box-shadow, opacity, transform, gap;
+    transition-timing-function: ease-in-out;
+    text-decoration: none;
+    font-size: 24px;
+    cursor: pointer;
+    border: 1px solid #000000;
+    padding: 0;
+    font-family: inherit;
+}
+
+@media (hover:hover) {
+    #rec1855442171 .t-btnflex.t-btnflex_type_button:not(.t-animate_no-hover):hover {
+        background-color: #ff9999;
+        box-shadow: 0px 10px 20px rgba(0,11,48,0.25) !important;
+    }
+    #rec1855442171 .t-btnflex.t-btnflex_type_button:not(.t-animate_no-hover):focus-visible {
+        box-shadow: 0px 10px 20px rgba(0,11,48,0.25) !important;
+    }
+}
+
+/* Стили для всех кнопок с эффектом ripple */
+.t-btn_effects {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: -1;
+}
+
+.t-btn_effects::after {
+    content: '';
+    position: absolute;
+    height: 350%;
+    width: 200%;
+    top: 0;
+    left: -100%;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 100%;
+    transform: scale(0);
+    z-index: 20;
+    animation-name: ripple;
+    animation-duration: 6s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+.t-btn_effects_md::after {
+    left: -130%;
+}
+
+.t-btn_effects_lg::after {
+    left: -150%;
+}
+
+@keyframes ripple {
+    20% {
+        opacity: 0;
+        transform: scale(2.5);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(2.5);
+    }
+}
+
+/* Кнопка "наверх" */
+.t890 {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.t890__arrow {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.t890__arrow:hover {
+    background: #1c59ff;
+}
+
+.t890__arrow:hover svg path {
+    stroke: #ffffff;
+}
+
+/* Стили для кнопки "наверх" */
+#rec1855433761 .t890 {
+    right:20px;
+    left:unset;
+}
+
+@media screen and (min-width:981px) {
+    #rec1855433761 .t890__arrow:hover svg path {
+        stroke:#ffffff;
+        stroke-width:1;
+    }
+    #rec1855433761 .t890__arrow:focus-visible svg path {
+        stroke:#ffffff;
+        stroke-width:1;
+    }
+    #rec1855433761 .t890__arrow:hover svg rect {
+        fill:#1c59ff;
+        fill-opacity:1;
+    }
+    #rec1855433761 .t890__arrow:focus-visible svg rect {
+        fill:#1c59ff;
+        fill-opacity:1;
+    }
+}
+
+#rec1855433761 .t890__arrow {
+    border-radius:53px;
+}
+
+/* Футер */
+.t463 {
+    background-color: #171717;
+    color: #ffffff;
+    padding: 15px 0;
+}
+
+.t463__maincontainer {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+.t463__colwrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.t463__col_center {
+    text-align: center;
+    flex: 1;
+}
+
+.t463__copyright {
+    font-size: 14px;
+    color: #ffffff;
+}
+
+#rec1855411031 .t463__link {
+    font-size:20px;
+    color:#ffffff;
+    font-weight:600;
+}
+#rec1855411031 .t463__logo {
+    font-size:20px;
+    color:#ffffff;
+    font-weight:600;
+}
+#rec1855411031 .t463__copyright {
+    color:#ffffff;
+}
+
+/* Стили для каждой кнопки */
+#rec1846420991 .t-btnflex.t-btnflex_type_button {
+    color:#000000;
+    background-color:#e0d9d9;
+    border-style:solid !important;
+    border-color:#000000 !important;
+    --border-width:3px;
+    border-radius:5px;
+    box-shadow:none !important;
+    font-family:Arial;
+    text-transform:uppercase;
+    transition-duration:0.2s;
+    transition-property:background-color,color,border-color,box-shadow,opacity,transform,gap;
+    transition-timing-function:ease-in-out;
+}
+
+#rec1855397851 .t-btnflex.t-btnflex_type_button {
+    color:#000000;
+    background-color:#d9c7c7;
+    border-style:solid !important;
+    border-color:#000000 !important;
+    --border-width:3px;
+    border-radius:5px;
+    box-shadow:none !important;
+    font-family:Arial;
+    text-transform:uppercase;
+    transition-duration:0.2s;
+    transition-property:background-color,color,border-color,box-shadow,opacity,transform,gap;
+    transition-timing-function:ease-in-out;
+}
+
+#rec1846439431 .t-btnflex.t-btnflex_type_button {
+    color:#000000;
+    background-color:#e0d9d9;
+    border-style:solid !important;
+    border-color:#000000 !important;
+    --border-width:3px;
+    border-radius:5px;
+    box-shadow:none !important;
+    font-family:Arial;
+    text-transform:uppercase;
+    transition-duration:0.2s;
+    transition-property:background-color,color,border-color,box-shadow,opacity,transform,gap;
+    transition-timing-function:ease-in-out;
+}
+
+#rec1846439751 .t-btnflex.t-btnflex_type_button {
+    color:#000000;
+    background-color:#d9c7c7;
+    border-style:solid !important;
+    border-color:#000000 !important;
+    --border-width:3px;
+    border-radius:5px;
+    box-shadow:none !important;
+    font-family:Arial;
+    text-transform:uppercase;
+    transition-duration:0.2s;
+    transition-property:background-color,color,border-color,box-shadow,opacity,transform,gap;
+    transition-timing-function:ease-in-out;
+}
+
+#rec1846439731 .t-btnflex.t-btnflex_type_button {
+    color:#000000;
+    background-color:#e0d9d9;
+    border-style:solid !important;
+    border-color:#000000 !important;
+    --border-width:3px;
+    border-radius:5px;
+    box-shadow:none !important;
+    font-family:Arial;
+    text-transform:uppercase;
+    transition-duration:0.2s;
+    transition-property:background-color,color,border-color,box-shadow,opacity,transform,gap;
+    transition-timing-function:ease-in-out;
+}
+
+#rec1846510411 .t-btnflex.t-btnflex_type_button {
+    color:#000000;
+    background-color:#d9c7c7;
+    border-style:solid !important;
+    border-color:#000000 !important;
+    --border-width:3px;
+    border-radius:5px;
+    box-shadow:none !important;
+    font-family:Arial;
+    text-transform:uppercase;
+    transition-duration:0.2s;
+    transition-property:background-color,color,border-color,box-shadow,opacity,transform,gap;
+    transition-timing-function:ease-in-out;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .t102__title {
+        font-size: 48px;
+    }
+
+    .t102__descr {
+        font-size: 24px;
+    }
+
+    .t-cover {
+        height: 100vh;
+        min-height: 600px;
+    }
+
+    .t1331__row {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .t-btnflex_md {
+        width: 90%;
+        max-width: 300px;
+    }
+
+    .t393 {
+        top: 10px;
+        right: 10px;
+    }
+}

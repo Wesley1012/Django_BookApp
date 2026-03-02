@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="container mt-4">
+    <h1>✏️ Редактирование: {{ submission.title }}</h1>
+    <p class="text-muted">Предложил: {{ submission.submitted_by.email }} | Дата: {{ submission.submitted_at|date:"d.m.Y H:i" }}</p>
+
+
+    <!-- ОСНОВНАЯ ФОРМА ДЛЯ РЕДАКТИРОВАНИЯ -->
+    <form method="post" enctype="multipart/form-data" id="main-form">
+        {% csrf_token %}
+
+        <!-- Основная информация -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>📖 Основная информация</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Название *</label>
+                            {{ form.title }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Автор *</label>
+                            {{ form.author }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Описание</label>
+                    {{ form.description }}
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>🏷️ Жанр</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+
+                    {{ form.genre }}
+                    <div class="form-text">Можно изменить жанр</div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Обложка -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>🖼️ Обложка</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Загрузить обложку</label>
+                            {{ form.cover }}
+
+                            {% if submission.cover or submission.cover_url %}
+                            <div class="mt-2">
+                                <small>Текущая обложка:</small><br>
+                                <!-- ИСПРАВЛЕНО: Используем метод модели -->
+                                <img src="{{ submission.get_cover_display }}"
+                                     style="max-height: 150px; max-width: 100%;"
+                                     class="img-thumbnail mt-1"
+                                     alt="Обложка {{ submission.title }}"
+                                     id="current-cover">
+                            </div>
+                            {% else %}
+                            <div class="mt-2">
+                                <img src="{% static 'books/img/no_image.png' %}"
+                                     style="max-height: 150px; max-width: 100%;"
+                                     class="img-thumbnail mt-1"
+                                     alt="Нет обложки">
+                                <div class="text-muted small mt-1">Нет обложки</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Ссылка на обложку</label>
+                            {{ form.cover_url }}
+                            <div class="form-text">
+                                Если указать URL, он будет приоритетнее загруженного файла
+                            </div>
+                        </div>
+
+                        <!-- Превью обложки из URL -->
+                        <div id="url-preview" class="mt-2" style="display: none;">
+                            <small>Превью из URL:</small><br>
+                            <img src="" style="max-height: 100px;" class="img-thumbnail mt-1"
+                                 id="url-preview-img" alt="Превью">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Оценки пользователя -->
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>⭐ Оценки пользователя (только для просмотра)</h5>
+            </div>
+            <div class="card-body">
+                {% if submission.want_rating %}
+                    <div class="alert alert-info">
+                        <strong>Пользователь оценил книгу:</strong> {{ submission.total_rating|floatformat:1 }}/10
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-2">
+                            <div class="border p-2 rounded">
+                                <strong>Прописанность персонажей:</strong>
+                                <span class="badge bg-primary float-end">{{ submission.characters_rating }}/10</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <div class="border p-2 rounded">
+                                <strong>Раскрытие идеи:</strong>
+                                <span class="badge bg-primary float-end">{{ submission.plot_rating }}/10</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <div class="border p-2 rounded">
+                                <strong>Читаемость:</strong>
+                                <span class="badge bg-primary float-end">{{ submission.style_rating }}/10</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <div class="border p-2 rounded">
+                                <strong>Актуальность:</strong>
+                                <span class="badge bg-primary float-end">{{ submission.originality_rating }}/10</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <div class="border p-2 rounded">
+                                <strong>Общее впечатление:</strong>
+                                <span class="badge bg-primary float-end">{{ submission.impression_rating }}/10</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if submission.review %}
+                    <div class="mt-3">
+                        <strong>Рецензия пользователя:</strong>
+                        <div class="border p-3 mt-2 bg-light rounded">
+                            <em>"{{ submission.review }}"</em>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% else %}
+                    <div class="alert alert-secondary">
+                        <i class="fas fa-info-circle"></i> Пользователь не оценивал книгу
+                    </div>
+                {% endif %}
+
+                {% if submission.is_favorite %}
+                    <div class="mt-3">
+                        <span class="badge bg-danger p-2">
+                            <i class="fas fa-heart"></i> Пользователь добавил в любимые
+                        </span>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+
+
+        <!-- КНОПКИ ОСНОВНОЙ ФОРМЫ -->
+        <div class="d-flex justify-content-between">
+            <div>
+                <button type="submit" class="btn btn-success btn-lg">
+                    💾 Сохранить изменения
+                </button>
+                <a href="{% url 'books:admin_submissions' %}" class="btn btn-secondary ms-2">
+                    ← Назад к списку
+                </a>
+            </div>
+        </div>
+    </form>
+
+    <!-- ОТДЕЛЬНЫЕ ФОРМЫ ДЛЯ БЫСТРЫХ ДЕЙСТВИЙ -->
+    <div class="mt-4 pt-4 border-top">
+        <h5>⚡ Быстрые действия</h5>
+        <p class="text-muted">Эти кнопки работают без валидации полей формы выше</p>
+
+        <div class="btn-group" role="group">
+            <!-- Форма для одобрения -->
+            <form method="post" action="{% url 'books:edit_submission' submission.id %}" class="d-inline">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="approve">
+                <button type="submit" class="btn btn-warning btn-lg"
+                        onclick="return confirm('Одобрить книгу «{{ submission.title }}» и добавить в ТОП?')">
+                    ✅ Одобрить и добавить в ТОП
+                </button>
+            </form>
+
+            <!-- Форма для отклонения -->
+            <form method="post" action="{% url 'books:edit_submission' submission.id %}" class="d-inline ms-2">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="reject">
+                <button type="submit" class="btn btn-outline-danger btn-lg"
+                        onclick="return confirm('Отклонить книгу «{{ submission.title }}»?')">
+                    ❌ Отклонить
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'books/js/edit_submission.js' %}"></script>
+{% endblock %}

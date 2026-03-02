@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/login.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- Основной фон с картинкой -->
+<div class="login-cover">
+    <div class="login-cover-filter"></div>
+
+    <!-- Контейнер формы -->
+    <div class="login-container">
+        <div class="login-card">
+            <h1 class="login-title">Вход</h1>
+
+            <!-- Сообщения об ошибках -->
+            {% if form.errors %}
+                <div class="error-message">
+                    {{ form.errors.error }}
+                </div>
+            {% endif %}
+
+            <!-- Форма входа -->
+            <form action="{% url 'login' %}" method="post" class="login-form" id="loginForm">
+                {% csrf_token %}
+
+                <!-- Поля формы -->
+                {% for field in form %}
+                    <div>
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}
+                            <small class="form-text text-muted">{{ field.help_text }}</small>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+                <div class="form-divider">
+                    <hr>
+                </div>
+
+                <button type="submit" class="btn btn-success login-btn" id="submitBtn" disabled>
+                    Войти
+                </button>
+            </form>
+
+            <!-- ССЫЛКИ - яркие и сочные -->
+            <div class="login-links">
+                <a href="{% url 'password_reset' %}">Забыли пароль?</a>
+                <span class="link-separator"></span>
+                <a href="{% url 'register' %}">Регистрация</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Кнопка "Главная" -->
+<a href="{% url 'home' %}" class="nav-home-btn">
+    <i class="fas fa-home"></i>
+    Главная
+</a>
+
+{% endblock %}
+
+{% block extra_js%}
+<script src="{% static 'js/login.js' %}"></script>
+{% endblock %}

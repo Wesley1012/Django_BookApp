@@ -1,0 +1,326 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'books/css/top_books.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- ШАПКА С КАРТИНКОЙ -->
+<div class="profile-cover">
+    <div class="profile-cover-filter"></div>
+    <div>
+        <h1 class="profile-title">ТОП Книг клуба</h1>
+
+    </div>
+</div>
+
+<!-- КНОПКА "ГЛАВНАЯ" -->
+<a href="{% url 'home' %}" class="nav-home-btn">
+    <i class="fas fa-home"></i>
+    Главная
+</a>
+
+<!-- ОСНОВНОЙ КОНТЕНТ -->
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0" style="font-size: 32px; color: #333;">🏆 Рейтинг книг</h1>
+        <div>
+            <span class="badge bg-primary p-3" style="font-size: 16px;">
+                <i class="fas fa-book me-2"></i>Всего книг: {{ books|length }}
+            </span>
+        </div>
+    </div>
+
+    <!-- ПОИСКОВАЯ ФОРМА -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <form method="get" action="{% url 'books:top_books' %}" class="row g-3">
+                <div class="col-md-12">
+                    <label for="search_query" class="form-label fw-bold">
+                        <i class="fas fa-search me-1" ></i> Поиск книг:
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-book"></i>
+                        </span>
+                        <input type="text"
+                               class="form-control"
+                               id="search_query"
+                               name="search"
+                               placeholder="Введите название книги или имя автора..."
+                               value="{{ search_query|default:'' }}"
+                               autocomplete="off"
+                               aria-label="Поиск книг">
+                        <button class="btn btn-primary" type="submit">
+                            <i class="fas fa-search"></i> Найти
+                        </button>
+                        {% if search_query %}
+                        <a href="{% url 'books:top_books' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times"></i> Сбросить
+                        </a>
+                        {% endif %}
+                    </div>
+                    <div class="form-text mt-2">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1" style="color: #d88c8c;"></i>
+                            Поиск работает по названию книги и имени автора одновременно.
+                            Например: <strong>"Преступление Достоевский"</strong> или просто <strong>"Достоевский"</strong>
+                        </small>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Информация о результатах поиска -->
+    {% if search_query %}
+    <div class="alert alert-info mb-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <i class="fas fa-search me-2" style="color: #d88c8c;"></i>
+                Поиск: <strong>"{{ search_query }}"</strong>
+                {% if books %}
+                    - найдено <strong>{{ books|length }}</strong> {% if books|length == 1 %}книга{% elif books|length >= 2 and books|length <= 4 %}книги{% else %}книг{% endif %}
+                {% else %}
+                    - книги не найдены
+                {% endif %}
+            </div>
+            <a href="{% url 'books:top_books' %}" class="btn btn-sm" style="background: #d88c8c; color: white;">
+                <i class="fas fa-list"></i> Показать все
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Панель сортировки -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h6 class="mb-0 fw-bold">
+                        <i class="fas fa-sort me-1" style="color: #d88c8c;"></i> Сортировка:
+                    </h6>
+                </div>
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <select class="form-select" id="sortSelect">
+                            {% for option in sort_options %}
+                            <option value="{{ option.value }}"
+                                    {% if sort_by == option.value %}selected{% endif %}>
+                                {{ option.label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <button class="btn" id="sortOrderBtn" style="background: #d88c8c; color: white; border: none;">
+                            {% if order == 'desc' %}
+                                <i class="fas fa-sort-down"></i> По убыванию
+                            {% else %}
+                                <i class="fas fa-sort-up"></i> По возрастанию
+                            {% endif %}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if books %}
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th width="5%">#</th>
+                    <th width="15%">
+                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}sort=title&order={% if sort_by == 'title' %}{{ next_order }}{% else %}desc{% endif %}"
+                           class="text-white text-decoration-none ">
+                            Название
+                            {% if sort_by == 'title' %}
+                                {% if order == 'desc' %}<i class="fas fa-sort-down ms-1"></i>{% else %}<i class="fas fa-sort-up ms-1"></i>{% endif %}
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th width="12%">
+                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}sort=author&order={% if sort_by == 'author' %}{{ next_order }}{% else %}desc{% endif %}"
+                           class="text-white text-decoration-none">
+                            Автор
+                            {% if sort_by == 'author' %}
+                                {% if order == 'desc' %}<i class="fas fa-sort-down ms-1"></i>{% else %}<i class="fas fa-sort-up ms-1"></i>{% endif %}
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th width="10%">
+                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}sort=genre&order={% if sort_by == 'genre' %}{{ next_order }}{% else %}desc{% endif %}"
+                           class="text-white text-decoration-none">
+                            Жанр
+                            {% if sort_by == 'genre' %}
+                                {% if order == 'desc' %}<i class="fas fa-sort-down ms-1"></i>{% else %}<i class="fas fa-sort-up ms-1"></i>{% endif %}
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th width="6%">
+                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}sort=reviews&order={% if sort_by == 'reviews' %}{{ next_order }}{% else %}desc{% endif %}"
+                           class="text-white text-decoration-none">
+                            <i class="fas fa-star"></i>
+                            {% if sort_by == 'reviews' %}
+                                {% if order == 'desc' %}<i class="fas fa-sort-down ms-1"></i>{% else %}<i class="fas fa-sort-up ms-1"></i>{% endif %}
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th width="8%">
+                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}sort=character&order={% if sort_by == 'character' %}{{ next_order }}{% else %}desc{% endif %}"
+                           class="text-white text-decoration-none">
+                            Прописанность персонажей
+                            {% if sort_by == 'character' %}
+                                {% if order == 'desc' %}<i class="fas fa-sort-down ms-1"></i>{% else %}<i class="fas fa-sort-up ms-1"></i>{% endif %}
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th width="8%">
+                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}sort=idea&order={% if sort_by == 'idea' %}{{ next_order }}{% else %}desc{% endif %}"
+                           class="text-white text-decoration-none">
+                            Раскрытие авторской идеи
+                            {% if sort_by == 'idea' %}
+                                {% if order == 'desc' %}<i class="fas fa-sort-down ms-1"></i>{% else %}<i class="fas fa-sort-up ms-1"></i>{% endif %}
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th width="8%">
+                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}sort=readability&order={% if sort_by == 'readability' %}{{ next_order }}{% else %}desc{% endif %}"
+                           class="text-white text-decoration-none">
+                            Читаемость
+                            {% if sort_by == 'readability' %}
+                                {% if order == 'desc' %}<i class="fas fa-sort-down ms-1"></i>{% else %}<i class="fas fa-sort-up ms-1"></i>{% endif %}
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th width="8%">
+                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}sort=relevance&order={% if sort_by == 'relevance' %}{{ next_order }}{% else %}desc{% endif %}"
+                           class="text-white text-decoration-none">
+                            Актуальность
+                            {% if sort_by == 'relevance' %}
+                                {% if order == 'desc' %}<i class="fas fa-sort-down ms-1"></i>{% else %}<i class="fas fa-sort-up ms-1"></i>{% endif %}
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th width="8%">
+                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}sort=impression&order={% if sort_by == 'impression' %}{{ next_order }}{% else %}desc{% endif %}"
+                           class="text-white text-decoration-none">
+                            Общее впечатление
+                            {% if sort_by == 'impression' %}
+                                {% if order == 'desc' %}<i class="fas fa-sort-down ms-1"></i>{% else %}<i class="fas fa-sort-up ms-1"></i>{% endif %}
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th width="8%">
+                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}sort=total&order={% if sort_by == 'total' %}{{ next_order }}{% else %}desc{% endif %}"
+                           class="text-white text-decoration-none">
+                            <i class="fas fa-crown"></i> Балл
+                            {% if sort_by == 'total' %}
+                                {% if order == 'desc' %}<i class="fas fa-sort-down ms-1"></i>{% else %}<i class="fas fa-sort-up ms-1"></i>{% endif %}
+                            {% endif %}
+                        </a>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for book in books %}
+                <tr>
+                    <td class="fw-bold">{{ forloop.counter }}</td>
+                    <td>
+                        <a href="{% url 'books:book_detail' book.id %}" class="text-decoration-none">
+                            <strong>{{ book.title }}</strong><br>
+                        </a>
+                    </td>
+                    <td>{{ book.author }}</td>
+                    <td>
+                        {% if book.genre %}
+                            <span class="badge" style="background: #d88c8c;">{{ book.get_genre_display }}</span>
+                        {% else %}
+                            <span class="text-muted">—</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="badge bg-secondary">{{ book.reviews_count|default:0 }}</span>
+                    </td>
+                    <td>
+                        <span class="badge bg-{% if book.avg_character >= 8 %}success{% elif book.avg_character >= 5 %}warning{% else %}danger{% endif %}">
+                            {{ book.avg_character|floatformat:1|default:"-" }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge bg-{% if book.avg_idea >= 8 %}success{% elif book.avg_idea >= 5 %}warning{% else %}danger{% endif %}">
+                            {{ book.avg_idea|floatformat:1|default:"-" }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge bg-{% if book.avg_readability >= 8 %}success{% elif book.avg_readability >= 5 %}warning{% else %}danger{% endif %}">
+                            {{ book.avg_readability|floatformat:1|default:"-" }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge bg-{% if book.avg_relevance >= 8 %}success{% elif book.avg_relevance >= 5 %}warning{% else %}danger{% endif %}">
+                            {{ book.avg_relevance|floatformat:1|default:"-" }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge bg-{% if book.avg_impression >= 8 %}success{% elif book.avg_impression >= 5 %}warning{% else %}danger{% endif %}">
+                            {{ book.avg_impression|floatformat:1|default:"-" }}
+                        </span>
+                    </td>
+                    <td>
+                        <strong style="color: #d88c8c; font-size: 18px;">{{ book.total_avg|floatformat:1 }}</strong>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Если нет результатов поиска -->
+    {% elif search_query %}
+    <div class="alert alert-warning shadow-sm">
+        <div class="d-flex">
+            <div class="me-3">
+                <i class="fas fa-search fa-2x" style="color: #ffc107;"></i>
+            </div>
+            <div>
+                <h5 class="alert-heading fw-bold">Книги не найдены</h5>
+                <p class="mb-1">По запросу <strong>"{{ search_query }}"</strong> ничего не найдено.</p>
+                <p class="mb-0">Попробуйте:</p>
+                <ul class="mb-0">
+                    <li>Проверить правильность написания</li>
+                    <li>Искать только по названию или только по автору</li>
+                    <li>Использовать более общие ключевые слова</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info shadow-sm">
+        <div class="d-flex">
+            <div class="me-3">
+                <i class="fas fa-info-circle fa-2x" style="color: #d88c8c;"></i>
+            </div>
+            <div>
+                <h4 class="alert-heading fw-bold">📭 Нет книг в ТОПе</h4>
+                <p class="mb-1">Пока ни одна книга не была одобрена администратором.</p>
+                <p class="mb-0">Как только книга будет одобрена, она автоматически появится здесь!</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+
+<!-- ФУТЕР -->
+<div class="profile-footer">
+    © Киря и Ваня
+</div>
+
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'books/js/edit_submission.js' %}"></script>
+{% endblock %}

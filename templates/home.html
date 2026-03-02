@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block content %}
+
+
+<!-- 1. Навигационная кнопка (фиксированная справа) -->
+<div id="rec1855442171" class="r t-rec" data-record-type="393">
+    <div id="nav1855442171" class="t393 t393__positionfixed">
+        <div class="t393__wrapper">
+            <form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="t-btn t-btnflex t-btnflex_type_button t-btnflex_md t393_btn">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 2. ОБЛОЖКА С ФОНОВОЙ КАРТИНКОЙ -->
+<div id="rec1846416451" class="r t-rec" data-record-type="14">
+    <div class="t-cover" id="recorddiv1846416451" style="height: 948px;">
+        <div class="t-cover__carrier" style="
+            background-image: url('https://optim.tildacdn.pub/tild3464-3531-4164-b230-356263373862/-/format/webp/photo_2025-11-29_18-.jpg.webp');
+            height: 948px;
+        "></div>
+        <div class="t-cover__filter"></div>
+        <div class="t-container">
+            <div class="t-col t-col_12">
+                <div class="t-cover__wrapper" style="height: 948px;">
+                    <div class="t102 t-align_center">
+                        <div class="t102__title">
+                            <span>в доме на курьих ножках</span>
+                        </div>
+                        <div class="t102__descr">
+                            <div><strong>Книжный клуб</strong></div>
+                        </div>
+                        <span class="space"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if user.is_authenticated %}
+    <!-- Кнопки для авторизованных пользователей -->
+    <div id="rec1846420991" class="r t-rec" style="background-color:#ddc7c7;">
+        <div class="t1331">
+            <div class="t-container">
+                <div class="t-col t-col_12">
+                    <div class="t1331__row t1331__row_center">
+                        <a class="t-btn t-btnflex t-btnflex_type_button t-btnflex_md"
+                           href="{% url 'my_profile' %}"
+                           data-btneffects-first="btneffects-ripple">
+                            <span class="t-btnflex__text">Личный кабинет</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="rec1855397851" class="r t-rec" style="background-color:#e0d9d9;">
+        <div class="t1331">
+            <div class="t-container">
+                <div class="t-col t-col_12">
+                    <div class="t1331__row t1331__row_center">
+                        <a class="t-btn t-btnflex t-btnflex_type_button t-btnflex_md"
+                           href="{% url 'members_list' %}"
+                           data-btneffects-first="btneffects-ripple">
+                            <span class="t-btnflex__text">Участники</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="rec1846439431" class="r t-rec" style="background-color:#ddc7c7;">
+        <div class="t1331">
+            <div class="t-container">
+                <div class="t-col t-col_12">
+                    <div class="t1331__row t1331__row_center">
+                        <a class="t-btn t-btnflex t-btnflex_type_button t-btnflex_md"
+                           href="{% url 'books:top_books' %}"
+                           data-btneffects-first="btneffects-ripple">
+                            <span class="t-btnflex__text">топ книг</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="rec1846439751" class="r t-rec" style="background-color:#e0d9d9;">
+        <div class="t1331">
+            <div class="t-container">
+                <div class="t-col t-col_12">
+                    <div class="t1331__row t1331__row_center">
+                        <a class="t-btn t-btnflex t-btnflex_type_button t-btnflex_md"
+                           href="{% url 'wheel_dashboard' %}"
+                           data-btneffects-first="btneffects-ripple">
+                            <span class="t-btnflex__text">бурмалда</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="rec1846439731" class="r t-rec" style="background-color:#ddc7c7;">
+        <div class="t1331">
+            <div class="t-container">
+                <div class="t-col t-col_12">
+                    <div class="t1331__row t1331__row_center">
+                        <a class="t-btn t-btnflex t-btnflex_type_button t-btnflex_md"
+                           href="{% url 'books:submit_book' %}"
+                           data-btneffects-first="btneffects-ripple">
+                            <span class="t-btnflex__text">Предложка</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="rec1846510411" class="r t-rec" style="background-color:#e0d9d9;">
+        <div class="t1331">
+            <div class="t-container">
+                <div class="t-col t-col_12">
+                    <div class="t1331__row t1331__row_center">
+                        <a class="t-btn t-btnflex t-btnflex_type_button t-btnflex_md"
+                           href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                           data-btneffects-first="btneffects-ripple">
+                            <span class="t-btnflex__text">о нас</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% else %}
+    <!-- Кнопки для неавторизованных пользователей -->
+    <div id="rec1846420991" class="r t-rec" style="background-color:#ddc7c7;">
+        <div class="t1331">
+            <div class="t-container">
+                <div class="t-col t-col_12">
+                    <div class="t1331__row t1331__row_center" style="gap: 10px;">
+                        <a class="t-btn t-btnflex t-btnflex_type_button t-btnflex_md"
+                           href="{% url 'login' %}"
+                           data-btneffects-first="btneffects-ripple">
+                            <span class="t-btnflex__text">Вход</span>
+                        </a>
+                        <a class="t-btn t-btnflex t-btnflex_type_button t-btnflex_md"
+                           href="{% url 'register' %}"
+                           data-btneffects-first="btneffects-ripple">
+                            <span class="t-btnflex__text">Регистрация</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+<!-- Кнопка "наверх" -->
+<div id="rec1855433761" class="r t-rec">
+    <div class="t890" style="display: none;">
+        <button type="button" class="t890__arrow" aria-label="Вернуться к началу страницы">
+            <svg role="presentation" width="60" height="50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M14 28L25 18l10 10" stroke="#000000" stroke-width="1" fill="none"></path>
+            </svg>
+        </button>
+    </div>
+</div>
+
+<!-- Футер -->
+<div id="rec1855411031" class="r t-rec" style="background-color:#171717;">
+    <div class="t463">
+        <div class="t463__maincontainer">
+            <div class="t463__colwrapper">
+                <div class="t463__col"></div>
+                <div class="t463__col t463__col_center">
+                    <div class="t463__copyright">© Киря и Ваня</div>
+                </div>
+                <div class="t463__col"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/home.js' %}"></script>
+{% endblock %}
