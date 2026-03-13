@@ -1,0 +1,149 @@
+.
+├── bookapp
+│   ├── asgi.py
+│   ├── __init__.py
+│   ├── settings.py
+│   ├── urls.py
+│   └── wsgi.py
+├── book_covers
+│   ├── 1555663947161772495.jpg
+│   ├── 1555663947161772495_MEWWeY6.jpg
+│   ├── 1602312451188691043_gDDRXoh.jpg
+│   ├── 1602312451188691043.jpg
+│   └── 3_15.jpg
+├── books
+│   ├── admin.py
+│   ├── apps.py
+│   ├── context_processors.py
+│   ├── forms.py
+│   ├── __init__.py
+│   ├── migrations
+│   │   ├── 0001_initial.py
+│   │   ├── 0002_alter_book_genre.py
+│   │   ├── 0003_alter_book_genre_alter_booksubmission_genre.py
+│   │   ├── 0004_alter_book_genre_alter_booksubmission_genre.py
+│   │   ├── 0005_alter_review_character_depth_and_more.py
+│   │   ├── 0006_alter_review_options_alter_book_id_and_more.py
+│   │   ├── 0007_book_is_club_book_booksubmission_is_club_book_and_more.py
+│   │   ├── 0008_delete_bookclubstatus.py
+│   │   └── __init__.py
+│   ├── models.py
+│   ├── static
+│   │   └── books
+│   ├── templates
+│   │   └── books
+│   ├── tests.py
+│   ├── urls.py
+│   └── views.py
+├── db.sqlite3
+├── games
+│   ├── admin.py
+│   ├── apps.py
+│   ├── forms.py
+│   ├── __init__.py
+│   ├── migrations
+│   │   ├── 0001_initial.py
+│   │   ├── 0002_alter_wheelconfiguration_options_and_more.py
+│   │   ├── 0003_wheelconfiguration_elimination_round_and_more.py
+│   │   ├── 0004_add_user_fields_to_theme.py
+│   │   ├── 0005_add_user_wheelsession.py
+│   │   ├── 0006_remove_userspinhistory_session_and_more.py
+│   │   ├── 0007_alter_spinhistory_id_alter_wheelconfiguration_id_and_more.py
+│   │   └── __init__.py
+│   ├── models.py
+│   ├── static
+│   │   └── games
+│   ├── templates
+│   │   └── games
+│   ├── tests.py
+│   ├── urls.py
+│   └── views.py
+├── manage.py
+├── media
+│   ├── avatars
+│   │   └── 2026
+│   └── book_covers
+│       ├── submissions
+│       └── top
+├── README.md
+├── requirements.txt
+├── static
+├── staticfiles
+│   ├── admin
+│   │   ├── css
+│   │   ├── img
+│   │   └── js
+│   ├── books
+│   │   ├── css
+│   │   ├── img
+│   │   └── js
+│   ├── games
+│   │   ├── css
+│   │   └── js
+│   ├── image_cropping
+│   │   ├── css
+│   │   └── js
+│   └── users
+│       ├── css
+│       ├── img
+│       └── js
+├── structure.txt
+├── templates
+│   ├── account
+│   │   ├── email_confirm.html
+│   │   ├── login.html
+│   │   ├── signup.html
+│   │   └── verification_sent.html
+│   ├── base.html
+│   ├── home.html
+│   └── registration
+│       ├── password_reset_complete.html
+│       ├── password_reset_confirm.html
+│       ├── password_reset_done.html
+│       ├── password_reset_email.html
+│       └── password_reset_form.html
+├── users
+│   ├── admin.py
+│   ├── apps.py
+│   ├── forms.py
+│   ├── __init__.py
+│   ├── migrations
+│   │   ├── 0001_initial.py
+│   │   ├── 0002_alter_user_options_user_avatar_cropping_and_more.py
+│   │   ├── 0003_remove_user_avatar_cropping.py
+│   │   ├── 0004_user_avatar_cropping.py
+│   │   ├── 0005_alter_user_id.py
+│   │   └── __init__.py
+│   ├── models.py
+│   ├── static
+│   │   └── users
+│   ├── templates
+│   │   └── users
+│   ├── templatetags
+│   │   ├── __init__.py
+│   │   └── user_tags.py
+│   ├── tests.py
+│   ├── urls.py
+│   └── views.py
+└── venv
+    ├── bin
+    │   ├── activate
+    │   ├── activate.csh
+    │   ├── activate.fish
+    │   ├── Activate.ps1
+    │   ├── django-admin
+    │   ├── pip
+    │   ├── pip3
+    │   ├── pip3.14
+    │   ├── python -> python3
+    │   ├── python3 -> /usr/bin/python3
+    │   ├── python3.14 -> python3
+    │   ├── sqlformat
+    │   └── 𝜋thon -> python3
+    ├── include
+    ├── lib
+    │   └── python3.14
+    ├── lib64 -> lib
+    └── pyvenv.cfg
+
+57 directories, 90 files
