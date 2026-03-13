@@ -431,36 +431,36 @@
                         <div class="table-responsive">
                             <table class="table table-hover mb-0" style="min-width: 600px;">
                                 <thead style="position: sticky; top: 0; background: white; z-index: 1; border-bottom: 2px solid #dee2e6;">
-                                    <tr>
-                                        <th>Название</th>
-                                        <th>Статус</th>
-                                        <th>Дата</th>
-                                        <th>Действия</th>
-                                    </tr>
+                                <tr>
+                                    <th>Название</th>
+                                    <th>Статус</th>
+                                    <th>Дата</th>
+                                    <th>Действия</th>
+                                </tr>
                                 </thead>
                                 <tbody>
-                                    {% for submission in submissions %}
-                                    <tr>
-                                        <td>
-                                            <strong>{{ submission.title|truncatechars:30 }}</strong>
-                                            <div class="small text-muted">{{ submission.author|truncatechars:20 }}</div>
-                                        </td>
-                                        <td>
+                                {% for submission in submissions %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ submission.title|truncatechars:30 }}</strong>
+                                        <div class="small text-muted">{{ submission.author|truncatechars:20 }}</div>
+                                    </td>
+                                    <td>
                                             <span class="badge bg-{% if submission.status == 'pending' %}warning{% elif submission.status == 'approved' %}success{% else %}danger{% endif %}">
                                                 {{ submission.get_status_display }}
                                             </span>
-                                        </td>
-                                        <td>{{ submission.submitted_at|date:"d.m.Y" }}</td>
-                                        <td>
-                                            {% if submission.status == 'approved' and submission.book_in_top %}
-                                                <a href="{% url 'books:book_detail' submission.book_in_top.id %}"
-                                                   class="btn btn-sm btn-success">
-                                                    👁 В ТОПе
-                                                </a>
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
+                                    </td>
+                                    <td>{{ submission.submitted_at|date:"d.m.Y" }}</td>
+                                    <td>
+                                        {% if submission.status == 'approved' and submission.book_in_top %}
+                                        <a href="{% url 'books:book_detail' submission.book_in_top.id %}"
+                                           class="btn btn-sm btn-success">
+                                            👁 В ТОПе
+                                        </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
                                 </tbody>
                             </table>
                         </div>

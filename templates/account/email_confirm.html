@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+{% load account %}
+{% load allauth %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'users/css/register.css' %}">
+{% endblock %}
+
+{% block head_title %}
+    {% trans "Подтверждение email" %}
+{% endblock head_title %}
+
+{% block content %}
+<!-- Основной фон с картинкой -->
+<div class="register-cover">
+    <div class="register-cover-filter"></div>
+
+    <!-- Контейнер формы -->
+    <div class="register-container">
+        <div class="register-card">
+            <h1 class="register-title">{% trans "Подтверждение email" %}</h1>
+
+            {% if confirmation %}
+                {% user_display confirmation.email_address.user as user_display %}
+                
+                {% if can_confirm %}
+                    <!-- Информационное сообщение -->
+                    <div style="text-align: center; margin-bottom: 30px;">
+                        <p style="font-size: 1.1rem; color: #666; margin-bottom: 20px;">
+                            {% blocktrans with email=confirmation.email_address.email %}
+                                Пожалуйста, подтвердите, что
+                            {% endblocktrans %}
+                        </p>
+                        
+                        <div style="background: #f8f9fa; border-radius: 12px; padding: 20px; margin-bottom: 25px;">
+                            <strong style="font-size: 1.2rem; color: #ff4757; word-break: break-all;">
+                                {{ confirmation.email_address.email }}
+                            </strong>
+                        </div>
+                        
+                        <p style="font-size: 1.1rem; color: #666;">
+                            {% blocktrans with user_display=user_display %}
+                                это ваш email для аккаунта <strong>{{ user_display }}</strong>.
+                            {% endblocktrans %}
+                        </p>
+                    </div>
+
+                    <!-- Форма подтверждения -->
+                    <form method="post" action="{% url 'account_confirm_email' confirmation.key %}" class="register-form" id="confirmForm">
+                        {% csrf_token %}
+                        {{ redirect_field }}
+
+                        <div class="form-divider">
+                            <hr>
+                        </div>
+
+                        <!-- Кнопка подтверждения -->
+                        <button type="submit" class="btn register-btn active" id="confirmBtn">
+                            ✅ {% trans "Подтвердить email" %}
+                        </button>
+                    </form>
+
+                    <!-- Дополнительная ссылка -->
+                    <div style="text-align: center; margin-top: 25px;">
+                        <small style="color: #999;">
+                            {% trans "Неверный email?" %}
+                            <a href="{% url 'account_email' %}" style="color: #ff4757; text-decoration: none;">
+                                {% trans "Изменить email" %}
+                            </a>
+                        </small>
+                    </div>
+
+                {% else %}
+                    <!-- Ошибка - email уже подтверждён другим аккаунтом -->
+                    <div class="error-message" style="margin: 20px 0;">
+                        {% blocktrans with email=confirmation.email_address.email %}
+                            Невозможно подтвердить {{ email }}, так как он уже подтверждён другим аккаунтом.
+                        {% endblocktrans %}
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 25px;">
+                        <a href="{% url 'account_login' %}" class="btn register-btn active" style="display: inline-block; width: auto; padding: 12px 30px !important;">
+                            🔑 {% trans "Войти" %}
+                        </a>
+                    </div>
+                {% endif %}
+
+            {% else %}
+                <!-- Ссылка недействительна или устарела -->
+                <div style="text-align: center; padding: 20px;">
+                    <div class="error-message" style="margin-bottom: 25px;">
+                        {% blocktrans %}
+                            Ссылка для подтверждения email недействительна или устарела.
+                        {% endblocktrans %}
+                    </div>
+                    
+                    <a href="{% url 'account_email' %}" class="btn register-btn active" style="display: inline-block; width: auto; padding: 12px 30px !important;">
+                        🔄 {% trans "Запросить новое письмо" %}
+                    </a>
+                </div>
+            {% endif %}
+
+            <!-- Ссылки -->
+            <div class="register-links">
+                <a href="{% url 'home' %}">🏠 {% trans "На главную" %}</a>
+                <span class="link-separator">|</span>
+                <a href="{% url 'account_login' %}">🔑 {% trans "Вход" %}</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Кнопка "Главная" (дублируем на случай если футер перекроет) -->
+<a href="{% url 'home' %}" class="nav-home-btn">
+    <i class="fas fa-home"></i>
+    {% trans "Главная" %}
+</a>
+
+<!-- Футер -->
+<div class="profile-footer">
+    © Киря и Ваня
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Кнопка уже активна, но можно добавить анимацию при клике
+    const confirmBtn = document.getElementById('confirmBtn');
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', function() {
+            this.innerHTML = '⏳ {% trans "Подтверждение..." %}';
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -109,7 +109,7 @@
 
         <div class="card mb-4">
             <div class="card-header">
-                <h5>⭐ Оценки пользователя (только для просмотра)</h5>
+                <h5>⭐ Оценки пользователя</h5>
             </div>
             <div class="card-body">
                 {% if submission.want_rating %}
@@ -150,14 +150,6 @@
                         </div>
                     </div>
 
-                    {% if submission.review %}
-                    <div class="mt-3">
-                        <strong>Рецензия пользователя:</strong>
-                        <div class="border p-3 mt-2 bg-light rounded">
-                            <em>"{{ submission.review }}"</em>
-                        </div>
-                    </div>
-                    {% endif %}
                 {% else %}
                     <div class="alert alert-secondary">
                         <i class="fas fa-info-circle"></i> Пользователь не оценивал книгу
@@ -173,7 +165,44 @@
                 {% endif %}
             </div>
         </div>
+        {% if submission.review %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>📝 Рецензия пользователя</h5>
+            </div>
+            <div class="card-body">
+                <div class="border p-3 bg-light rounded">
+                    <em>"{{ submission.review }}"</em>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        <!-- Клубная книга -->
+        <div class="card mb-4">
+            <div class="card-header" style="background-color: #ffc107;">
+                <h5 class="mb-0">⭐ Статус клубной книги</h5>
+            </div>
+            <div class="card-body">
+                <div class="form-check form-switch">
+                    {{ form.is_club_book }}
+                    <label class="form-check-label" for="{{ form.is_club_book.id_for_label }}" style="font-weight: bold; color: #ffc107; font-size: 1.1rem;">
+                        ⭐ Книга отмечена клубом
+                    </label>
+                    <div class="form-text mt-2">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Отметьте, если книга уже прочитана и одобрена клубом.
+                        В ТОПе она будет подсвечена желтым, а на странице книги появится звездочка.
+                    </div>
+                </div>
 
+                <!-- Дополнительная информация если нужно -->
+                {% if submission.is_club_book %}
+                <div class="alert alert-warning mt-3 mb-0">
+                    <i class="fas fa-star me-2"></i> Эта книга отмечена как клубная. При одобрении получит специальную отметку.
+                </div>
+                {% endif %}
+            </div>
+        </div>
 
 
         <!-- КНОПКИ ОСНОВНОЙ ФОРМЫ -->

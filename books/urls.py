@@ -16,6 +16,6 @@ urlpatterns = [
     path('book/<int:book_id>/favorite/', views.toggle_favorite, name='toggle_favorite'),
     # Новые URL для отдельного удаления
     path('book/<int:book_id>/delete-rating/', views.delete_rating, name='delete_rating'),
-
     path('book/<int:book_id>/delete-comment/', views.delete_comment, name='delete_comment'),
+
 ]

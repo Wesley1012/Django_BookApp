@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+{% load allauth account %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'users/css/register.css' %}">
+{% endblock %}
+
+{% block head_title %}
+    {% trans "Вход" %}
+{% endblock head_title %}
+
+{% block content %}
+<!-- Основной фон с картинкой -->
+<div class="register-cover">
+    <div class="register-cover-filter"></div>
+
+    <!-- Контейнер формы -->
+    <div class="register-container">
+        <div class="register-card">
+            <h1 class="register-title">{% trans "Вход" %}</h1>
+
+            {% if not SOCIALACCOUNT_ONLY %}
+                <!-- Ссылка на регистрацию для новых пользователей -->
+                <p style="text-align: center; color: #666; margin-bottom: 25px;">
+                    {% blocktranslate %}Если у вас ещё нет аккаунта, пожалуйста, 
+                    <a href="{{ signup_url }}" style="color: #ff4757; text-decoration: none; font-weight: bold;">зарегистрируйтесь</a> 
+                    сначала.{% endblocktranslate %}
+                </p>
+
+                <!-- Ошибки формы -->
+                {% if form.errors %}
+                    <div class="error-message">
+                        {% trans "Пожалуйста, исправьте ошибки ниже" %}
+                    </div>
+                {% endif %}
+
+                <!-- Форма входа -->
+                <form method="post" action="{% url 'account_login' %}" class="register-form" id="loginForm">
+                    {% csrf_token %}
+
+                    <!-- Поле email -->
+                    <div class="form-group">
+                        <label for="id_login">{% trans "Email" %}</label>
+                        <input type="email" name="login" id="id_login" class="form-control" 
+                               value="{{ form.login.value|default:'' }}" required>
+                        {% if form.login.errors %}
+                            <div class="errorlist">{{ form.login.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Поле пароля -->
+                    <div class="form-group">
+                        <label for="id_password">{% trans "Пароль" %}</label>
+                        <input type="password" name="password" id="id_password" class="form-control" required>
+                        {% if form.password.errors %}
+                            <div class="errorlist">{{ form.password.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Запомнить меня (если есть) -->
+                    {% if form.remember %}
+                    <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" name="remember" id="id_remember" style="width: auto;">
+                        <label for="id_remember" style="margin: 0;">{% trans "Запомнить меня" %}</label>
+                    </div>
+                    {% endif %}
+
+                    {{ redirect_field }}
+
+                    <div class="form-divider">
+                        <hr>
+                    </div>
+
+                    <!-- Кнопка входа -->
+                    <button type="submit" class="btn register-btn" id="loginBtn" disabled>
+                        🔑 {% trans "Войти" %}
+                    </button>
+                </form>
+
+                <!-- Ссылка на восстановление пароля -->
+                <div style="text-align: center; margin-top: 20px;">
+                    <a href="{% url 'account_reset_password' %}" style="color: #ff4757; text-decoration: none; font-size: 0.9rem;">
+                        {% trans "Забыли пароль?" %}
+                    </a>
+                </div>
+            {% endif %}
+
+            {% if LOGIN_BY_CODE_ENABLED or PASSKEY_LOGIN_ENABLED %}
+                <div class="form-divider">
+                    <hr>
+                </div>
+                
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    {% if PASSKEY_LOGIN_ENABLED %}
+                        <button type="submit" form="mfa_login" id="passkey_login" 
+                                class="btn register-btn" style="background: linear-gradient(135deg, #667eea, #764ba2) !important; opacity: 1; cursor: pointer;">
+                            🔐 {% trans "Войти с passkey" %}
+                        </button>
+                    {% endif %}
+                    
+                    {% if LOGIN_BY_CODE_ENABLED %}
+                        <a href="{{ request_login_code_url }}" class="btn register-btn" 
+                           style="background: linear-gradient(135deg, #48c78e, #257953) !important; text-align: center; opacity: 1;">
+                            📧 {% trans "Отправить код входа" %}
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            {% if SOCIALACCOUNT_ENABLED %}
+                <div class="form-divider">
+                    <hr>
+                </div>
+                {% include "socialaccount/snippets/login.html" with page_layout="entrance" %}
+            {% endif %}
+
+            <!-- Ссылки -->
+            <div class="register-links">
+                <a href="{% url 'home' %}">🏠 {% trans "На главную" %}</a>
+                <span class="link-separator">|</span>
+                <a href="{{ signup_url }}">✨ {% trans "Регистрация" %}</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Кнопка "Главная" -->
+<a href="{% url 'home' %}" class="nav-home-btn">
+    <i class="fas fa-home"></i>
+    {% trans "Главная" %}
+</a>
+
+<!-- Футер -->
+<div class="profile-footer">
+    © Киря и Ваня
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const loginForm = document.getElementById('loginForm');
+    const loginBtn = document.getElementById('loginBtn');
+    
+    if (loginForm && loginBtn) {
+        const inputs = loginForm.querySelectorAll('input[type="email"], input[type="password"]');
+        
+        function checkFormValidity() {
+            let allFilled = true;
+            inputs.forEach(input => {
+                if (input.value.trim() === '') {
+                    allFilled = false;
+                }
+            });
+            
+            if (allFilled) {
+                loginBtn.classList.add('active');
+                loginBtn.disabled = false;
+            } else {
+                loginBtn.classList.remove('active');
+                loginBtn.disabled = true;
+            }
+        }
+        
+        inputs.forEach(input => {
+            input.addEventListener('input', checkFormValidity);
+            input.addEventListener('blur', checkFormValidity);
+        });
+        
+        checkFormValidity();
+    }
+});
+</script>
+
+{% if PASSKEY_LOGIN_ENABLED %}
+    {% include "mfa/webauthn/snippets/login_script.html" with button_id="passkey_login" %}
+{% endif %}
+{% endblock %}

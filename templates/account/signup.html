@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'users/css/register.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- Основной фон с картинкой -->
+<div class="register-cover">
+    <div class="register-cover-filter"></div>
+
+    <!-- Контейнер формы -->
+    <div class="register-container">
+        <div class="register-card">
+            <h1 class="register-title">Регистрация</h1>
+
+            <!-- Ошибки формы -->
+            {% if form.errors %}
+                <div class="error-message">
+                    Пожалуйста, исправьте ошибки ниже
+                </div>
+            {% endif %}
+
+            <!-- Форма регистрации -->
+            <form method="post" action="{% url 'account_signup' %}" class="register-form" id="registerForm">
+                {% csrf_token %}
+
+                <!-- Поля формы - ТОЧНО КАК У ТЕБЯ, НО АДАПТИРОВАНО ПОД ALLAUTH -->
+                <div class="form-group">
+                    <label for="id_first_name">Имя</label>
+                    <input type="text" name="first_name" id="id_first_name" class="form-control" value="{{ form.first_name.value|default:'' }}" required>
+                    {% if form.first_name.errors %}
+                        <div class="errorlist">{{ form.first_name.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="id_last_name">Фамилия</label>
+                    <input type="text" name="last_name" id="id_last_name" class="form-control" value="{{ form.last_name.value|default:'' }}" required>
+                    {% if form.last_name.errors %}
+                        <div class="errorlist">{{ form.last_name.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="id_email">Email</label>
+                    <input type="email" name="email" id="id_email" class="form-control" value="{{ form.email.value|default:'' }}" required>
+                    {% if form.email.errors %}
+                        <div class="errorlist">{{ form.email.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="id_password1">Пароль</label>
+                    <input type="password" name="password1" id="id_password1" class="form-control" required>
+                    {% if form.password1.errors %}
+                        <div class="errorlist">{{ form.password1.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="id_password2">Подтверждение пароля</label>
+                    <input type="password" name="password2" id="id_password2" class="form-control" required>
+                    {% if form.password2.errors %}
+                        <div class="errorlist">{{ form.password2.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Скрытое поле для редиректа (если нужно) -->
+                {% if redirect_field_value %}
+                    <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+                {% endif %}
+
+                <div class="form-divider">
+                    <hr>
+                </div>
+
+                <!-- Кнопка регистрации -->
+                <button type="submit" class="btn register-btn" id="registerBtn" disabled>
+                    ✨ Зарегистрироваться
+                </button>
+            </form>
+
+            <!-- Ссылки -->
+            <div class="register-links">
+                <span class="text-muted">Уже есть аккаунт?</span>
+                <a href="{% url 'account_login' %}">🔑 Войти</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Кнопка "Главная" -->
+<a href="{% url 'home' %}" class="nav-home-btn">
+    <i class="fas fa-home"></i>
+    Главная
+</a>
+
+<!-- Футер -->
+<div class="profile-footer">
+    © Киря и Ваня
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'users/js/register.js' %}"></script>
+{% endblock %}

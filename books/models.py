@@ -19,6 +19,7 @@ class BookSubmission(models.Model):
         ('fiction', 'Художественная литература'),
         ('classic', 'Классика'),
         ('fantasy', 'Фэнтези'),
+        ('dystopia', 'Антиутопия'),
         ('scifi', 'Научная фантастика'),
         ('detective', 'Детектив'),
         ('thriller', 'Триллер'),
@@ -46,6 +47,7 @@ class BookSubmission(models.Model):
         ('manga', 'Манга'),
         ('fanfiction', 'Фанфик'),
         ('erotica', 'Эротика'),
+        ('novel', 'Роман'),
         ('other', 'Другое'),
     ]
 
@@ -54,6 +56,10 @@ class BookSubmission(models.Model):
     author = models.CharField(max_length=200, verbose_name="Автор")
     description = models.TextField(verbose_name="Описание")
     review = models.TextField(blank=True, verbose_name="Рецензия пользователя")
+    is_club_book = models.BooleanField(
+        default=False,
+        verbose_name="Книга отмечена клубом"
+    )
 
     # ЖАНРЫ (множественный выбор)
     genre = models.CharField(  # ДОБАВЬ
@@ -150,6 +156,11 @@ class Book(models.Model):
         null=True
     )
 
+    is_club_book = models.BooleanField(
+        default=False,
+        verbose_name="Книга отмечена клубом"
+    )
+
     # Связь с предложкой (для истории)
     submission = models.OneToOneField(
         BookSubmission,
@@ -201,10 +212,6 @@ class Book(models.Model):
         verbose_name_plural = "Книги в ТОПе"
         ordering = ['-added_at']
 
-
-# books/models.py
-
-# books/models.py
 
 class Review(models.Model):
     """Модель для оценок и рецензий книг в ТОПе"""

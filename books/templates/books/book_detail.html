@@ -3,6 +3,32 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'books/css/book_detail.css' %}">
+<style>
+    /* Желтая рамка для клубных книг */
+    {% if book.is_club_book %}
+    .card.mb-4 .row.g-0 {
+        border: 3px solid #ffc107 !important;
+        border-radius: 10px !important;
+        box-shadow: 0 0 20px rgba(255, 193, 7, 0.3) !important;
+        transition: all 0.3s ease;
+    }
+
+    .card.mb-4 .row.g-0:hover {
+        box-shadow: 0 0 30px rgba(255, 193, 7, 0.5) !important;
+    }
+    {% endif %}
+
+    /* Анимация для звездочки */
+    .btn-warning {
+        animation: starPulse 2s infinite;
+    }
+
+    @keyframes starPulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -54,13 +80,23 @@
                             {% endif %}
                         </div>
                         <div>
+                            <!-- Звездочка клубной книги -->
+                        {% if book.is_club_book %}
+                        <div class="position-relative" title="Книга отмечена клубом">
+                            <div class="btn btn-warning btn-lg" style="width: 60px; height: 60px; font-size: 32px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 15px rgba(255, 193, 7, 0.5);">
+                                ⭐
+                            </div>
+                        </div>
+                        {% endif %}
                             <!-- Кнопка избранного -->
-                            <form action="{% url 'books:toggle_favorite' book.id %}" method="post">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-outline-danger btn-lg">
-                                    {% if is_favorite %}❤️{% else %}🤍{% endif %}
-                                </button>
-                            </form>
+                        <form action="{% url 'books:toggle_favorite' book.id %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-danger btn-lg" title="Добавить в избранное" style="width: 60px; height: 60px; font-size: 24px;">
+                                {% if is_favorite %}❤️{% else %}🤍{% endif %}
+                            </button>
+                        </form>
+
+
                         </div>
                     </div>
 

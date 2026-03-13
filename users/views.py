@@ -59,8 +59,15 @@ def my_profile(request):
     # Только рецензии с текстом (для отдельного блока)
     reviews_with_comments = reviews.exclude(comment='').exclude(comment__isnull=True)
 
-    # Предложки пользователя
-    submissions = BookSubmission.objects.filter(submitted_by=user).order_by('-submitted_at')
+    all_submissions = BookSubmission.objects.filter(submitted_by=user)
+
+    submissions = []
+    for submission in all_submissions:
+        if submission.status != 'approved' or (submission.status == 'approved' and hasattr(submission, 'book_in_top')):
+            submissions.append(submission)
+
+    # Сортируем по дате
+    submissions.sort(key=lambda x: x.submitted_at, reverse=True)
 
     # Получаем все рецензии для личного топа
     user_reviews = reviews.select_related('book')
@@ -298,30 +305,40 @@ def edit_profile(request):
 
 
 def members_list(request):
+    from django.db.models import Count, Q
     from django.http import JsonResponse
     from django.template.loader import render_to_string
-
+    from books.models import Review
+    
     User = get_user_model()
-
+    
     # Получаем параметры сортировки
     sort_by = request.GET.get('sort', 'date_joined')
     order = request.GET.get('order', 'desc')
-
+    
     # Получаем всех пользователей
     users = User.objects.all()
-
-    # Собираем статистику (как у вас)
+    
+    # Собираем статистику
     user_stats = []
     for user in users:
         # Количество одобренных предложок
         approved_submissions_count = user.booksubmission_set.filter(status='approved').count()
-
-        # Количество рецензий
-        reviews_count = user.book_reviews.count()
-
+        
+        # Количество ОЦЕНЕННЫХ книг (где есть хотя бы одна оценка)
+        reviews_count = Review.objects.filter(
+            user=user
+        ).filter(
+            Q(character_depth__isnull=False) |
+            Q(idea_reveal__isnull=False) |
+            Q(readability__isnull=False) |
+            Q(relevance__isnull=False) |
+            Q(overall_impression__isnull=False)
+        ).count()
+        
         # Количество избранных книг
         favorite_books_count = user.favorite_books.count()
-
+        
         # Количество оценок из предложок (старое)
         total_ratings_count = 0
         approved_submissions = user.booksubmission_set.filter(status='approved', want_rating=True)
@@ -334,15 +351,15 @@ def members_list(request):
                 submission.impression_rating
             ]
             total_ratings_count += sum(1 for r in ratings if r > 0)
-
+        
         user_stats.append({
             'user': user,
             'approved_submissions_count': approved_submissions_count,
-            'reviews_count': reviews_count,
+            'reviews_count': reviews_count,  # Теперь это количество ОЦЕНЕННЫХ книг
             'favorite_books_count': favorite_books_count,
             'total_ratings_count': total_ratings_count,
         })
-
+    
     # СОРТИРОВКА
     if sort_by == 'username':
         user_stats.sort(key=lambda x: x['user'].username.lower(), reverse=(order == 'desc'))
@@ -354,24 +371,24 @@ def members_list(request):
         user_stats.sort(key=lambda x: x['reviews_count'], reverse=(order == 'desc'))
     elif sort_by == 'favorites':
         user_stats.sort(key=lambda x: x['favorite_books_count'], reverse=(order == 'desc'))
-
-    # Если это AJAX запрос - возвращаем только HTML таблицы
+    
+    # Если это AJAX запрос - возвращаем только таблицу
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         html = render_to_string('users/members_list.html', {
             'user_stats': user_stats,
             'sort_by': sort_by,
             'order': order,
-            'ajax': True,  # Флаг для AJAX запроса
+            'ajax': True,
         }, request=request)
         return JsonResponse({'html': html})
-
+    
     # Обычный запрос - полная страница
     context = {
         'user_stats': user_stats,
         'sort_by': sort_by,
         'order': order,
     }
-
+    
     return render(request, 'users/members_list.html', context)
 
 @login_required

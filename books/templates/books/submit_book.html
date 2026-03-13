@@ -98,82 +98,81 @@
                         </div>
 
                         <!-- Оценки -->
-                        <div class="card mb-4">
-                            <div class="card-header">
-                                <div class="form-check form-switch">
-                                    {{ form.want_rating }}
-                                    <label class="form-check-label" for="{{ form.want_rating.id_for_label }}">
-                                        <strong>⭐ Хочу оценить книгу</strong>
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="card-body" id="ratingSection">
-                                <div class="row">
+<div class="card mb-4">
+    <div class="card-header">
+        <div class="form-check form-switch">
+            {{ form.want_rating }}
+            <label class="form-check-label" for="{{ form.want_rating.id_for_label }}">
+                <strong>⭐ Хочу оценить книгу</strong>
+            </label>
+        </div>
 
-                                    <!-- Персонажи -->
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">
-                                            Прописанность персонажей
-                                            <span id="characters_value" class="badge bg-primary ms-2">0</span>
-                                        </label>
-                                        <input type="range" name="characters_rating" class="form-range" min="0" max="10" value="0"
-                                               oninput="updateValue('characters', this.value); calculateTotal()">
-                                    </div>
-                                                     <!-- Сюжет -->
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">
-                                            Раскрытие авторской идеи
-                                            <span id="plot_value" class="badge bg-primary ms-2">0</span>
-                                        </label>
-                                        <input type="range" name="plot_rating" class="form-range" min="0" max="10" value="0"
-                                               oninput="updateValue('plot', this.value); calculateTotal()">
-                                    </div>
+    </div>
+    <div class="card-body" id="ratingSection" style="display: none;">
+        <div class="row">
+            <!-- Персонажи -->
+            <div class="col-md-6 mb-3">
+                <label class="form-label">
+                    Прописанность персонажей
+                    <span id="characters_value" class="badge bg-primary ms-2">0</span>
+                </label>
+                <input type="range" name="characters_rating" class="form-range" min="0" max="10" value="0"
+                       oninput="updateValue('characters', this.value); calculateTotal()">
+            </div>
+            <!-- Сюжет -->
+            <div class="col-md-6 mb-3">
+                <label class="form-label">
+                    Раскрытие авторской идеи
+                    <span id="plot_value" class="badge bg-primary ms-2">0</span>
+                </label>
+                <input type="range" name="plot_rating" class="form-range" min="0" max="10" value="0"
+                       oninput="updateValue('plot', this.value); calculateTotal()">
+            </div>
 
+            <!-- Стиль -->
+            <div class="col-md-6 mb-3">
+                <label class="form-label">
+                    Читаемость
+                    <span id="style_value" class="badge bg-primary ms-2">0</span>
+                </label>
+                <input type="range" name="style_rating" class="form-range" min="0" max="10" value="0"
+                       oninput="updateValue('style', this.value); calculateTotal()">
+            </div>
 
-                                    <!-- Стиль -->
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">
-                                            Читаемость
-                                            <span id="style_value" class="badge bg-primary ms-2">0</span>
-                                        </label>
-                                        <input type="range" name="style_rating" class="form-range" min="0" max="10" value="0"
-                                               oninput="updateValue('style', this.value); calculateTotal()">
-                                    </div>
+            <!-- Оригинальность -->
+            <div class="col-md-6 mb-3">
+                <label class="form-label">
+                    Актуальность
+                    <span id="originality_value" class="badge bg-primary ms-2">0</span>
+                </label>
+                <input type="range" name="originality_rating" class="form-range" min="0" max="10" value="0"
+                       oninput="updateValue('originality', this.value); calculateTotal()">
+            </div>
 
-                                    <!-- Оригинальность -->
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">
-                                            Актуальность
-                                            <span id="originality_value" class="badge bg-primary ms-2">0</span>
-                                        </label>
-                                        <input type="range" name="originality_rating" class="form-range" min="0" max="10" value="0"
-                                               oninput="updateValue('originality', this.value); calculateTotal()">
-                                    </div>
+            <!-- Впечатление -->
+            <div class="col-md-6 mb-3">
+                <label class="form-label">
+                    Общее впечатление
+                    <span id="impression_value" class="badge bg-primary ms-2">0</span>
+                </label>
+                <input type="range" name="impression_rating" class="form-range" min="0" max="10" value="0"
+                       oninput="updateValue('impression', this.value); calculateTotal()">
+            </div>
 
-                                    <!-- Впечатление -->
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">
-                                            Общее впечатление
-                                            <span id="impression_value" class="badge bg-primary ms-2">0</span>
-                                        </label>
-                                        <input type="range" name="impression_rating" class="form-range" min="0" max="10" value="0"
-                                               oninput="updateValue('impression', this.value); calculateTotal()">
-                                    </div>
+            <!-- Итоговая оценка -->
+            <div class="col-md-6 mb-3">
+                <div class="card h-100 bg-light">
+                    <div class="card-body text-center">
+                        <h6 class="card-title">Общая оценка</h6>
+                        <div class="display-4 text-primary" id="total_rating">0.0</div>
+                        <div class="text-muted">из 10</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-                                    <!-- Итоговая оценка -->
-                                    <div class="col-md-6 mb-3">
-                                        <div class="card h-100 bg-light">
-                                            <div class="card-body text-center">
-                                                <h6 class="card-title">Общая оценка</h6>
-                                                <div class="display-4 text-primary" id="total_rating">0.0</div>
-                                                <div class="text-muted">из 10</div>
-
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
 
                         <!-- Избранное -->
                         <div class="card mb-4">
@@ -184,6 +183,13 @@
                                         <strong>❤️ Добавить в мои любимые книги</strong>
                                     </label>
                                     <div class="form-text">Книга появится в вашем личном кабинете</div>
+                                </div>
+                                <div class="form-check form-switch">
+                                    {{ form.is_club_book }}
+                                    <label class="form-check-label" for="{{ form.is_club_book.id_for_label }}" style="font-weight: bold; color: #fffff;">
+                                        ⭐ Книга отмечена клубом
+                                    </label>
+                                    <small class="text-muted d-block">Отметьте, если книга уже прочитана и одобрена клубом</small>
                                 </div>
                             </div>
                         </div>
@@ -207,7 +213,60 @@
     © Киря и Ваня
 </div>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const wantRatingCheckbox = document.getElementById('{{ form.want_rating.id_for_label }}');
+    const ratingSection = document.getElementById('ratingSection');
+
+    // Отладка - проверяем, нашли ли элементы
+    console.log('Checkbox found:', wantRatingCheckbox);
+    console.log('Rating section found:', ratingSection);
+
+    if (!wantRatingCheckbox) {
+        console.error('Checkbox not found! ID used: {{ form.want_rating.id_for_label }}');
+        return;
+    }
+
+    if (!ratingSection) {
+        console.error('Rating section not found!');
+        return;
+    }
+
+    // Функция для показа/скрытия блока с оценками
+    function toggleRatingSection() {
+        console.log('Checkbox state:', wantRatingCheckbox.checked);
+        if (wantRatingCheckbox.checked) {
+            ratingSection.style.display = 'block';
+        } else {
+            ratingSection.style.display = 'none';
+        }
+    }
+
+    // Проверяем начальное состояние
+    toggleRatingSection();
+
+    // Следим за изменениями чекбокса
+    wantRatingCheckbox.addEventListener('change', toggleRatingSection);
+});
+
+// Функции для обновления значений
+function updateValue(field, value) {
+    document.getElementById(field + '_value').textContent = value;
+}
+
+function calculateTotal() {
+    const characters = parseInt(document.querySelector('[name="characters_rating"]').value) || 0;
+    const plot = parseInt(document.querySelector('[name="plot_rating"]').value) || 0;
+    const style = parseInt(document.querySelector('[name="style_rating"]').value) || 0;
+    const originality = parseInt(document.querySelector('[name="originality_rating"]').value) || 0;
+    const impression = parseInt(document.querySelector('[name="impression_rating"]').value) || 0;
+
+    const total = (characters + plot + style + originality + impression) / 5;
+    document.getElementById('total_rating').textContent = total.toFixed(1);
+}
+</script>
 {% endblock %}
+
 
 {% block extra_js %}
 <script src="{% static 'books/js/submit_book.js' %}"></script>

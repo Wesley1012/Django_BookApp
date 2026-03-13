@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 from easy_thumbnails.conf import Settings as thumbnail_settings
 
 from django.conf.global_settings import AUTH_USER_MODEL, LOGIN_REDIRECT_URL, LOGOUT_REDIRECT_URL, EMAIL_BACKEND
@@ -22,25 +23,21 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
+load_dotenv() 
+
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    'bc-dkn.ru',
-]
+ALLOWED_HOSTS = ['*']
+
 
 AUTH_USER_MODEL = 'users.User'
 LOGIN_REDIRECT_URL = '/users/'
 LOGOUT_REDIRECT_URL = '/'
-# LOGIN_URL = "/login/"
-
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-EMAIL_USE_LOCALTIME = True
+LOGIN_URL = '/users/auth/login/'
 
 # Application definition
 
@@ -51,11 +48,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
     'users',
     'books',
     'games',
     'easy_thumbnails',
     'image_cropping',
+    'allauth',
+    'allauth.account',
 ]
 
 THUMBNAIL_ALIASES = {
@@ -91,6 +91,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'bookapp.urls'
@@ -138,12 +139,12 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
     },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    # {
+    #     'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    # },
+    # {
+    #     'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    # },
 ]
 
 
@@ -175,4 +176,39 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
 
+SITE_ID = 3  
+
+# Отключаем стандартные URL-ы регистрации, оставляем только allauth
+ACCOUNT_ADAPTER = 'allauth.account.adapter.DefaultAccountAdapter'
+
+# КРИТИЧЕСКИ ВАЖНЫЕ НАСТРОЙКИ для обязательного подтверждения
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = 'none'  # 'mandatory' - обязательное подтверждение
+ACCOUNT_CONFIRM_EMAIL_ON_GET = True  # подтверждение по клику на ссылку
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = False 
+ACCOUNT_EMAIL_CONFIRMATION_HMAC = True  
+ACCOUNT_EMAIL_CONFIRMATION_COOLDOWN = 180  
+
+ACCOUNT_SIGNUP_REDIRECT_URL = '/accounts/confirm-email/'
+LOGIN_REDIRECT_URL = '/home/'
+
+# Настройки логина
+ACCOUNT_AUTHENTICATION_METHOD = 'email'  
+ACCOUNT_USERNAME_REQUIRED = False  
+ACCOUNT_FORMS = {
+    'signup': 'users.forms.CustomSignupForm',  
+}
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.timeweb.ru'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True  # или EMAIL_USE_SSL = True для порта 465
+EMAIL_HOST_USER = 'bookclub@bc-dkn.ru'
+EMAIL_HOST_PASSWORD = 'dUmBaSs980625'
+DEFAULT_FROM_EMAIL = 'bookclub@bc-dkn.ru'
+SERVER_EMAIL = 'bookclub@bc-dkn.ru'

@@ -6,7 +6,7 @@ from . import views
 # app_name = 'users'
 
 urlpatterns = [
-    path('auth/', include('django.contrib.auth.urls')),
+    # path('auth/', include('django.contrib.auth.urls')),
     path('', views.home, name='home'),
     path('register/', views.Register.as_view(), name='register'),
     path('profile/edit/', views.edit_profile, name='edit_profile'),
@@ -18,4 +18,3 @@ urlpatterns = [
 ]
 
 
-    # path('users/<int:user_id>/', views.user_profile, name='user_profile'),

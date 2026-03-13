@@ -9,6 +9,7 @@ urlpatterns = [
     path('admin/', admin.site.urls, name='admin'),
     path('', RedirectView.as_view(url='/users/', permanent=True)),
     path('users/', include('users.urls')),
+    path('accounts/', include('allauth.urls')),
     path('home/', home, name='home'),
     path('books/', include('books.urls')),
     path('games/', include('games.urls')),

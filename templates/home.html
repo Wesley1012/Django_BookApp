@@ -12,7 +12,7 @@
 <div id="rec1855442171" class="r t-rec" data-record-type="393">
     <div id="nav1855442171" class="t393 t393__positionfixed">
         <div class="t393__wrapper">
-            <form action="{% url 'logout' %}" method="post">
+            <form action="{% url 'account_logout' %}" method="post">
                 {% csrf_token %}
                 <button type="submit" class="t-btn t-btnflex t-btnflex_type_button t-btnflex_md t393_btn">
                     <i class="fa-solid fa-arrow-right-from-bracket"></i>
@@ -147,19 +147,19 @@
     </div>
 
 {% else %}
-    <!-- Кнопки для неавторизованных пользователей -->
+    <!-- Кнопки для неавторизованных пользователей (allauth) -->
     <div id="rec1846420991" class="r t-rec" style="background-color:#ddc7c7;">
         <div class="t1331">
             <div class="t-container">
                 <div class="t-col t-col_12">
                     <div class="t1331__row t1331__row_center" style="gap: 10px;">
                         <a class="t-btn t-btnflex t-btnflex_type_button t-btnflex_md"
-                           href="{% url 'login' %}"
+                           href="{% url 'account_login' %}"
                            data-btneffects-first="btneffects-ripple">
                             <span class="t-btnflex__text">Вход</span>
                         </a>
                         <a class="t-btn t-btnflex t-btnflex_type_button t-btnflex_md"
-                           href="{% url 'register' %}"
+                           href="{% url 'account_signup' %}"
                            data-btneffects-first="btneffects-ripple">
                             <span class="t-btnflex__text">Регистрация</span>
                         </a>

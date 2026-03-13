@@ -70,6 +70,12 @@
                             {% if submission.is_favorite %}
                             <span class="badge bg-danger">❤️ Любимая книга</span>
                             {% endif %}
+
+                            {% if submission.is_club_book %}
+                            <span class="badge bg-warning" >
+                                ⭐ Клубная
+                            </span>
+                            {% endif %}
                         </div>
                     </div>
 

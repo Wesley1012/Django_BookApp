@@ -13,6 +13,12 @@ class BookSubmissionForm(forms.ModelForm):
         label="Жанр",
         required=True
     )
+    is_club_book = forms.BooleanField(
+        required=False,
+        initial=False,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),  # это для обычного чекбокса
+        label="⭐ Книга отмечена клубом"
+    )
 
     class Meta:
         model = BookSubmission
@@ -21,7 +27,7 @@ class BookSubmissionForm(forms.ModelForm):
             'cover', 'cover_url', 'genre',
             'plot_rating', 'characters_rating', 'style_rating',
             'originality_rating', 'impression_rating',
-            'is_favorite', 'want_rating'
+            'is_favorite', 'want_rating', 'is_club_book',
         ]
 
         widgets = {
@@ -106,18 +112,21 @@ class BookSubmissionForm(forms.ModelForm):
         return submission
 
 
-# books/forms.py
-
-# books/forms.py
 
 class BookSubmissionAdminForm(forms.ModelForm):
     """Упрощенная форма для админа"""
+    is_club_book = forms.BooleanField(
+        required=False,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        label="⭐ Книга отмечена клубом"
+    )
 
     class Meta:
         model = BookSubmission
         fields = [
             'title', 'author', 'description', 'genre',
             'cover', 'cover_url', 'review',
+            'is_club_book',  # ← И СЮДА ТОЖЕ
         ]
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
@@ -126,7 +135,8 @@ class BookSubmissionAdminForm(forms.ModelForm):
             'genre': forms.Select(attrs={'class': 'form-control'}),
             'cover': forms.FileInput(attrs={'class': 'form-control'}),
             'cover_url': forms.URLInput(attrs={'class': 'form-control'}),
-            'review': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+            'review': forms.Textarea(attrs={'rows': 3, 'class': 'form-control', 'placeholder': 'Рецензия пользователя'}),
+            'is_club_book': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -134,8 +144,6 @@ class BookSubmissionAdminForm(forms.ModelForm):
         self.fields['cover'].required = False
         self.fields['cover_url'].required = False
 
-
-# books/forms.py
 
 class ReviewForm(forms.ModelForm):
     """Форма для рецензии (без обязательных оценок)"""

@@ -1,62 +1,4 @@
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.table-hover tbody tr:hover {
-    background: rgba(216, 140, 140, 0.05);
-    transition: background 0.3s ease;
-}
-
-.table-dark a:hover {
-    color: #f6c0c0 !important;
-}
-
-.btn:active {
-    transform: translateY(0);
-}
-
-.card {
-    border: none;
-    border-radius: 15px;
-    transition: all 0.3s ease;
-}
-
-.card:hover {
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
-}
-
-.input-group-text {
-    border-radius: 10px 0 0 10px !important;
-}
-
-.form-control {
-    border-radius: 0 10px 10px 0 !important;
-    border: 2px solid #e1e1e1;
-}
-
-.form-control:focus {
-    border-color: #d88c8c !important;
-    box-shadow: 0 0 0 0.25rem rgba(216, 140, 140, 0.25) !important;
-}
-
-.form-select {
-    border: 2px solid #e1e1e1;
-    border-radius: 10px !important;
-}
-
-.form-select:focus {
-    border-color: #d88c8c !important;
-    box-shadow: 0 0 0 0.25rem rgba(216, 140, 140, 0.25) !important;
-}
-
-.badge {
-    padding: 8px 12px;
-    font-weight: 500;
-    border-radius: 8px;
-}
-
-/* Стиль для обложки как в home */
+    /* Стиль для обложки как в home */
     .profile-cover {
         position: relative;
         height: 250px;
@@ -87,18 +29,7 @@
         color: #fff;
         position: relative;
         z-index: 2;
-
         margin: 0;
-    }
-
-    .profile-subtitle {
-        font-family: Arial, sans-serif;
-        font-size: 20px;
-        color: #000;
-        position: relative;
-        z-index: 2;
-        margin-top: 15px;
-        text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
     }
 
     /* Кнопка "Главная" */
@@ -134,34 +65,14 @@
         .profile-title {
             font-size: 36px;
         }
-
-        .profile-subtitle {
-            font-size: 16px;
-        }
-
         .profile-cover {
             height: 200px;
         }
-
         .nav-home-btn {
             top: 10px;
             right: 10px;
             padding: 6px 12px;
             font-size: 14px;
-        }
-    }
-
-    @media (max-width: 480px) {
-        .profile-title {
-            font-size: 28px;
-        }
-
-        .profile-subtitle {
-            font-size: 14px;
-        }
-
-        .profile-cover {
-            height: 180px;
         }
     }
 
@@ -176,7 +87,7 @@
         margin-top: 40px;
     }
 
-    /* Дополнительные стили для ТОП страницы */
+    /* Стили для таблицы */
     .table-dark {
         background: linear-gradient(135deg, #2c3e50, #1e272e) !important;
     }
@@ -239,4 +150,89 @@
         border-top: none;
         border-right: none;
         border-bottom: none;
+    }
+
+    /* Стили для статусов книг */
+    .table tbody tr.status-club,
+    .table tbody tr.status-club td {
+        background-color: rgba(144, 238, 144, 0.2) !important;
+    }
+
+    .table tbody tr.status-non_club,
+    .table tbody tr.status-non_club td {
+        background-color: rgba(255, 255, 255, 0.5) !important;
+    }
+
+    .table tbody tr.status-club:hover,
+    .table tbody tr.status-club:hover td {
+        background-color: rgba(144, 238, 144, 0.35) !important;
+    }
+
+    .table tbody tr.status-non_club:hover,
+    .table tbody tr.status-non_club:hover td {
+        background-color: rgba(255, 182, 193, 0.4) !important;
+    }
+
+    .table-hover tbody tr:hover {
+        background: rgba(216, 140, 140, 0.05);
+        transition: background 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes legendaryGlow {
+        0% { box-shadow: 0 0 5px #FFD700; }
+        50% { box-shadow: 0 0 20px #FFA500; }
+        100% { box-shadow: 0 0 5px #FFD700; }
+    }
+
+    .rank-legendary {
+        animation: legendaryGlow 2s infinite;
+    }
+
+    .btn:active {
+        transform: translateY(0);
+    }
+
+    .card {
+        border: none;
+        border-radius: 15px;
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+    }
+
+    .input-group-text {
+        border-radius: 10px 0 0 10px !important;
+    }
+
+    .form-control {
+        border-radius: 0 10px 10px 0 !important;
+        border: 2px solid #e1e1e1;
+    }
+
+    .form-control:focus {
+        border-color: #d88c8c !important;
+        box-shadow: 0 0 0 0.25rem rgba(216, 140, 140, 0.25) !important;
+    }
+
+    .form-select {
+        border: 2px solid #e1e1e1;
+        border-radius: 10px !important;
+    }
+
+    .form-select:focus {
+        border-color: #d88c8c !important;
+        box-shadow: 0 0 0 0.25rem rgba(216, 140, 140, 0.25) !important;
+    }
+
+    .badge {
+        padding: 8px 12px;
+        font-weight: 500;
+        border-radius: 8px;
     }

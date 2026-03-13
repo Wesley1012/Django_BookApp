@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'users/css/register.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="register-cover">
+    <div class="register-cover-filter"></div>
+    <div class="register-container">
+        <div class="register-card">
+            <h1 class="register-title">✉️ Подтвердите email</h1>
+            
+            <div style="text-align: center; padding: 2rem;">
+                <p style="font-size: 1.2rem; margin-bottom: 2rem;">
+                    На ваш email отправлено письмо с ссылкой для подтверждения.
+                </p>
+                <p style="color: var(--gray);">
+                    Перейдите по ссылке в письме, чтобы активировать аккаунт.
+                </p>
+                
+                <div style="margin-top: 2rem;">
+                    <a href="{% url 'home' %}" class="btn register-btn active" style="display: inline-block; width: auto; padding: 12px 30px !important;">
+                        🏠 На главную
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<a href="{% url 'home' %}" class="nav-home-btn">
+    <i class="fas fa-home"></i> Главная
+</a>
+
+<div class="profile-footer">
+    © Киря и Ваня
+</div>
+{% endblock %}

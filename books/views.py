@@ -4,11 +4,9 @@ from django.contrib import messages
 from .forms import BookSubmissionForm, BookSubmissionAdminForm, ReviewForm
 from .models import BookSubmission, Book, Review, FavoriteBook
 from django.shortcuts import get_object_or_404
-from django.db import models
-from django.db.models import Count, Avg, Sum, F, Q
+from django.db.models import Count, Avg, F, Q
 from django.views.decorators.http import require_POST
 from django.contrib.admin.views.decorators import staff_member_required
-from django.utils.text import slugify
 
 
 @login_required
@@ -83,6 +81,7 @@ def edit_submission(request, submission_id):
                         submission=submission,
                         cover_url=submission.cover_url,
                         genre=submission.genre,  # копируем жанр
+                        is_club_book=submission.is_club_book,
                         is_active=True
                     )
 
@@ -95,16 +94,16 @@ def edit_submission(request, submission_id):
                         )
 
                     # Рецензия из предложки
-                    if submission.want_rating:
+                    if submission.review:  # Убрали проверку submission.want_rating
                         Review.objects.create(
                             book=book,
                             user=submission.submitted_by,
-                            character_depth=submission.characters_rating,
-                            idea_reveal=submission.plot_rating,
-                            readability=submission.style_rating,
-                            relevance=submission.originality_rating,
-                            overall_impression=submission.impression_rating,
-                            comment=submission.review or '',
+                            character_depth=submission.characters_rating if submission.want_rating else None,
+                            idea_reveal=submission.plot_rating if submission.want_rating else None,
+                            readability=submission.style_rating if submission.want_rating else None,
+                            relevance=submission.originality_rating if submission.want_rating else None,
+                            overall_impression=submission.impression_rating if submission.want_rating else None,
+                            comment=submission.review,
                             is_from_submission=True
                         )
 
@@ -170,6 +169,7 @@ def approve_submission(request, submission_id):
             submission=submission,
             cover_url=submission.cover_url,
             genre=submission.genre,  # копируем жанр
+            is_club_book=submission.is_club_book,
             is_active=True
         )
 
@@ -182,16 +182,16 @@ def approve_submission(request, submission_id):
             )
 
         # Рецензия из предложки
-        if submission.want_rating:
+        if submission.review:  # Убрали проверку submission.want_rating
             Review.objects.create(
                 book=book,
                 user=submission.submitted_by,
-                character_depth=submission.characters_rating,
-                idea_reveal=submission.plot_rating,
-                readability=submission.style_rating,
-                relevance=submission.originality_rating,
-                overall_impression=submission.impression_rating,
-                comment=submission.review or '',
+                character_depth=submission.characters_rating if submission.want_rating else None,
+                idea_reveal=submission.plot_rating if submission.want_rating else None,
+                readability=submission.style_rating if submission.want_rating else None,
+                relevance=submission.originality_rating if submission.want_rating else None,
+                overall_impression=submission.impression_rating if submission.want_rating else None,
+                comment=submission.review,
                 is_from_submission=True
             )
 
@@ -218,30 +218,29 @@ def reject_submission(request, submission_id):
     return redirect('books:admin_submissions')
 
 
-# books/views.py (обновляем функцию top_books)
-
-# books/views.py
-
 def top_books(request):
-    # Получаем все активные книги
     books = Book.objects.filter(is_active=True).prefetch_related('reviews')
 
     # ПОИСК
     search_query = request.GET.get('search', '').strip()
-
     if search_query:
         search_query_lower = search_query.lower()
         all_books = list(books)
         filtered_books = []
-
         for book in all_books:
             title_lower = book.title.lower()
             author_lower = book.author.lower()
             if search_query_lower in title_lower or search_query_lower in author_lower:
                 filtered_books.append(book)
-
         book_ids = [book.id for book in filtered_books]
         books = Book.objects.filter(id__in=book_ids)
+
+    # ФИЛЬТР ПО СТАТУСУ
+    status_filter = request.GET.get('status', 'all')
+    if status_filter == 'club':
+        books = books.filter(is_club_book=True)  # только клубные
+    elif status_filter == 'non_club':
+        books = books.filter(is_club_book=False)
 
     # Сортировка
     sort_by = request.GET.get('sort', 'total')
@@ -266,9 +265,9 @@ def top_books(request):
     # Общий балл
     books = books.annotate(
         total_avg=(
-                          F('avg_character') + F('avg_idea') + F('avg_readability') +
-                          F('avg_relevance') + F('avg_impression')
-                  ) / 5
+            F('avg_character') + F('avg_idea') + F('avg_readability') +
+            F('avg_relevance') + F('avg_impression')
+        ) / 5
     )
 
     # Применяем сортировку
@@ -288,35 +287,25 @@ def top_books(request):
     sort_field = sort_fields.get(sort_by, 'total_avg')
     books = books.order_by(f'{order_prefix}{sort_field}')
 
-    # Если это AJAX запрос - возвращаем только таблицу
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return render(request, 'books/partials/top_books_table.html', {
-            'books': books,
-            'search_query': search_query,
-        })
-
-    # Обычный запрос - полная страница
-    next_order = 'asc' if order == 'desc' else 'desc'
-    sort_options = [
-        {'value': 'total', 'label': 'Общий балл'},
-        {'value': 'title', 'label': 'Название'},
-        {'value': 'author', 'label': 'Автор'},
-        {'value': 'genre', 'label': 'Жанр'},
-        {'value': 'reviews', 'label': 'Количество оценок'},
-        {'value': 'character', 'label': 'Прописанность персонажей'},
-        {'value': 'idea', 'label': 'Раскрытие идеи'},
-        {'value': 'readability', 'label': 'Читаемость'},
-        {'value': 'relevance', 'label': 'Актуальность'},
-        {'value': 'impression', 'label': 'Впечатление'},
-    ]
-
     context = {
         'books': books,
         'sort_by': sort_by,
         'order': order,
-        'next_order': next_order,
-        'sort_options': sort_options,
+        'next_order': 'asc' if order == 'desc' else 'desc',
+        'sort_options': [
+            {'value': 'total', 'label': 'Общий балл'},
+            {'value': 'title', 'label': 'Название'},
+            {'value': 'author', 'label': 'Автор'},
+            {'value': 'genre', 'label': 'Жанр'},
+            {'value': 'reviews', 'label': 'Количество оценок'},
+            {'value': 'character', 'label': 'Персонажи'},
+            {'value': 'idea', 'label': 'Идея'},
+            {'value': 'readability', 'label': 'Читаемость'},
+            {'value': 'relevance', 'label': 'Актуальность'},
+            {'value': 'impression', 'label': 'Впечатление'},
+        ],
         'search_query': search_query,
+        'current_status': status_filter,
     }
 
     return render(request, 'books/top_books.html', context)
@@ -327,6 +316,8 @@ def top_books(request):
 def book_detail(request, book_id):
     """Страница книги с оценками и рецензиями"""
     book = get_object_or_404(Book, id=book_id, is_active=True)
+
+    club_status = book.is_club_book
 
     # Рецензии пользователя (если есть)
     user_review = None
@@ -358,6 +349,7 @@ def book_detail(request, book_id):
 
     context = {
         'book': book,
+        'club_status': club_status,
         'user_review': user_review,
         'user_has_reviewed': user_review is not None,
         'is_favorite': FavoriteBook.objects.filter(user=request.user.id,
@@ -499,6 +491,8 @@ def toggle_favorite(request, book_id):
         })
 
     return redirect('books:book_detail', book_id=book.id)
+
+
 
 
 
