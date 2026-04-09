@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchParams = new URLSearchParams(window.location.search);
     const searchQuery = searchParams.get('search') || '';
     const currentStatus = searchParams.get('status') || 'all';
+    const ratingType = searchParams.get('rating_type') || 'all';  // Добавляем rating_type
 
     function updateTable(sortBy, order) {
         const scrollPosition = window.scrollY;
@@ -19,6 +20,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         if (currentStatus && currentStatus !== 'all') {
             url += `&status=${currentStatus}`;
+        }
+        if (ratingType && ratingType !== 'all') {  // Добавляем rating_type
+            url += `&rating_type=${ratingType}`;
         }
 
         fetch(url, {
@@ -67,6 +71,7 @@ document.addEventListener('DOMContentLoaded', function() {
         newUrl.searchParams.set('order', order);
         if (searchQuery) newUrl.searchParams.set('search', searchQuery);
         if (currentStatus && currentStatus !== 'all') newUrl.searchParams.set('status', currentStatus);
+        if (ratingType && ratingType !== 'all') newUrl.searchParams.set('rating_type', ratingType);
         window.history.pushState({}, '', newUrl);
     });
 
@@ -83,6 +88,7 @@ document.addEventListener('DOMContentLoaded', function() {
         newUrl.searchParams.set('order', newOrder);
         if (searchQuery) newUrl.searchParams.set('search', searchQuery);
         if (currentStatus && currentStatus !== 'all') newUrl.searchParams.set('status', currentStatus);
+        if (ratingType && ratingType !== 'all') newUrl.searchParams.set('rating_type', ratingType);
         window.history.pushState({}, '', newUrl);
     });
 

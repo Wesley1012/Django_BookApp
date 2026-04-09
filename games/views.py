@@ -37,8 +37,11 @@ def wheel_dashboard(request):
                 order=i
             )
 
+    # ========== ОБРАБОТКА POST ЗАПРОСОВ ==========
     if request.method == 'POST':
         action = request.POST.get('action')
+
+        print(f"DEBUG: action={action}")  # Временная отладка
 
         if action == 'add_theme':
             name = request.POST.get('name')
@@ -53,18 +56,19 @@ def wheel_dashboard(request):
                     owner=request.user,
                     is_active=True
                 )
-                # Добавляем тему в конфигурацию пользователя
                 WheelSector.objects.create(
                     configuration=config,
                     theme=theme,
                     order=WheelSector.objects.filter(configuration=config).count()
                 )
+            return redirect('wheel_dashboard')
 
         elif action == 'delete_theme':
             theme_id = request.POST.get('theme_id')
             if theme_id:
                 theme = get_object_or_404(WheelTheme, id=theme_id, owner=request.user)
                 theme.delete()
+            return redirect('wheel_dashboard')
 
         elif action == 'update_probability':
             theme_id = request.POST.get('theme_id')
@@ -73,19 +77,7 @@ def wheel_dashboard(request):
                 theme = get_object_or_404(WheelTheme, id=theme_id, owner=request.user)
                 theme.probability = probability
                 theme.save()
-
-        elif action == 'toggle_elimination':
-            config.is_elimination_active = not config.is_elimination_active
-            if not config.is_elimination_active:
-                config.elimination_round = 0
-                # Восстанавливаем все темы пользователя
-                WheelTheme.objects.filter(owner=request.user, is_active=False).update(is_active=True)
-            config.save()
-
-        elif action == 'reset_elimination':
-            config.elimination_round = 0
-            WheelTheme.objects.filter(owner=request.user, is_active=False).update(is_active=True)
-            config.save()
+            return redirect('wheel_dashboard')
 
         elif action == 'restore_theme':
             theme_id = request.POST.get('theme_id')
@@ -93,8 +85,27 @@ def wheel_dashboard(request):
                 theme = get_object_or_404(WheelTheme, id=theme_id, owner=request.user)
                 theme.is_active = True
                 theme.save()
+            return redirect('wheel_dashboard')
 
-        return redirect('wheel_dashboard')
+        elif action == 'toggle_elimination':
+            print(f"DEBUG: Toggling elimination. Current: {config.is_elimination_active}")
+            config.is_elimination_active = not config.is_elimination_active
+            if not config.is_elimination_active:
+                config.elimination_round = 0
+                # Восстанавливаем все темы пользователя
+                restored = WheelTheme.objects.filter(owner=request.user, is_active=False).update(is_active=True)
+                print(f"DEBUG: Restored {restored} themes")
+            config.save()
+            print(f"DEBUG: New state: {config.is_elimination_active}")
+            return redirect('wheel_dashboard')
+
+        elif action == 'reset_elimination':
+            print(f"DEBUG: Resetting elimination")
+            config.elimination_round = 0
+            restored = WheelTheme.objects.filter(owner=request.user, is_active=False).update(is_active=True)
+            print(f"DEBUG: Restored {restored} themes")
+            config.save()
+            return redirect('wheel_dashboard')
 
     # Получаем темы для колеса (только активные темы пользователя!)
     wheel_themes = user_themes.filter(is_active=True)
@@ -136,8 +147,14 @@ def spin_result(request):
     """Обработка результата вращения колеса"""
     if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         try:
-            theme_name = request.POST.get('theme_name')
-            is_elimination = request.POST.get('is_elimination') == 'true'
+            # Поддерживаем как JSON, так и FormData
+            if request.content_type == 'application/json':
+                data = json.loads(request.body)
+                theme_name = data.get('theme_name')
+                is_elimination = data.get('is_elimination', False)
+            else:
+                theme_name = request.POST.get('theme_name')
+                is_elimination = request.POST.get('is_elimination') == 'true'
 
             # Получаем тему
             theme = get_object_or_404(WheelTheme, name=theme_name, owner=request.user)
@@ -155,7 +172,7 @@ def spin_result(request):
 
             # Если режим навыбывание - делаем тему неактивной
             eliminated = False
-            if is_elimination:
+            if is_elimination and config.is_elimination_active:
                 theme.is_active = False
                 theme.save()
                 config.elimination_round += 1
@@ -177,8 +194,6 @@ def spin_result(request):
                         'name': t.name,
                         'color': t.color,
                         'probability': t.probability,
-                        'startAngle': current_angle,
-                        'endAngle': current_angle + angle,
                         'angle': angle,
                     })
                     current_angle += angle
@@ -203,8 +218,14 @@ def update_theme_probability(request):
     """Обновление вероятности темы"""
     if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         try:
-            theme_id = request.POST.get('theme_id')
-            probability = float(request.POST.get('probability', 1.0))
+            # Поддерживаем как JSON, так и FormData
+            if request.content_type == 'application/json':
+                data = json.loads(request.body)
+                theme_id = data.get('theme_id')
+                probability = float(data.get('probability', 1.0))
+            else:
+                theme_id = request.POST.get('theme_id')
+                probability = float(request.POST.get('probability', 1.0))
 
             theme = get_object_or_404(WheelTheme, id=theme_id, owner=request.user)
             theme.probability = probability
@@ -225,8 +246,6 @@ def update_theme_probability(request):
                         'name': t.name,
                         'color': t.color,
                         'probability': t.probability,
-                        'startAngle': current_angle,
-                        'endAngle': current_angle + angle,
                         'angle': angle,
                     })
                     current_angle += angle
@@ -240,5 +259,3 @@ def update_theme_probability(request):
             return JsonResponse({'success': False, 'error': str(e)})
 
     return JsonResponse({'success': False, 'error': 'Invalid request'})
-
-# Удаляем spin_wheel_api - он больше не нужен

@@ -218,3 +218,91 @@
         border-radius: 12px;
         margin-left: 8px;
     }
+
+    /* Овалы для реакций */
+    .reaction-badge {
+        display: inline-flex;
+        align-items: center;
+        background: #f0f2f5;
+        border-radius: 30px;
+        padding: 4px 12px 4px 8px;
+        gap: 6px;
+    }
+
+    .reaction-badge.likes {
+        background: #e8f5e9;
+    }
+
+    .reaction-badge.dislikes {
+        background: #ffebee;
+    }
+
+    .reaction-avatars {
+        display: flex;
+        align-items: center;
+    }
+
+    .reaction-avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid white;
+        margin-left: -8px;
+        transition: transform 0.2s;
+    }
+
+    .reaction-avatar:first-child {
+        margin-left: 0;
+    }
+
+    .reaction-avatar:hover {
+        transform: scale(1.1);
+        z-index: 1;
+    }
+
+    .reaction-avatar-placeholder {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: #9e9e9e;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: bold;
+        border: 2px solid white;
+        margin-left: -8px;
+    }
+
+    .reaction-avatar-placeholder:first-child {
+        margin-left: 0;
+    }
+
+    .reaction-count {
+        font-size: 13px;
+        font-weight: 600;
+        color: #65676b;
+    }
+
+    .reaction-btn {
+        background: none;
+        border: none;
+        font-size: 16px;
+        padding: 4px 8px;
+        border-radius: 20px;
+        transition: background 0.2s;
+    }
+
+    .reaction-btn:hover {
+        background: #e4e6e9;
+    }
+
+    .reaction-btn.active-like {
+        color: #28a745;
+    }
+
+    .reaction-btn.active-dislike {
+        color: #dc3545;
+    }

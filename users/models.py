@@ -7,6 +7,20 @@ import os
 
 
 class User(AbstractUser):
+
+    ROLE_CHOICES = [
+        ('staff', 'Персонал клуба'),  # Члены клуба (бывший is_staff)
+        ('active', 'Активный читатель'),  # Обычные зарегистрированные пользователи
+        ('guest', 'Гость'),  # Незарегистрированные (только просмотр)
+    ]
+
+    role = models.CharField(
+        max_length=20,
+        choices=ROLE_CHOICES,
+        default='active',
+        verbose_name="Роль пользователя"
+    )
+
     email = models.EmailField("email address", unique=True)
     username = models.CharField(
         "username",
@@ -65,6 +79,11 @@ class User(AbstractUser):
 
     def get_absolute_url(self):
         return reverse('user_profile', kwargs={'user_id': self.id})
+
+    @property
+    def is_club_member(self):
+        """Совместимость: является ли пользователь членом клуба"""
+        return self.role == 'staff' or self.is_staff
 
     @property
     def display_avatar(self):

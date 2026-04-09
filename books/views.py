@@ -1,5 +1,7 @@
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import get_user_model
 from django.contrib import messages
 from .forms import BookSubmissionForm, BookSubmissionAdminForm, ReviewForm
 from .models import BookSubmission, Book, Review, FavoriteBook
@@ -8,6 +10,7 @@ from django.db.models import Count, Avg, F, Q
 from django.views.decorators.http import require_POST
 from django.contrib.admin.views.decorators import staff_member_required
 
+User = get_user_model()
 
 @login_required
 def submit_book(request):
@@ -238,39 +241,106 @@ def top_books(request):
     # ФИЛЬТР ПО СТАТУСУ
     status_filter = request.GET.get('status', 'all')
     if status_filter == 'club':
-        books = books.filter(is_club_book=True)  # только клубные
+        books = books.filter(is_club_book=True)
     elif status_filter == 'non_club':
         books = books.filter(is_club_book=False)
 
-    # Сортировка
-    sort_by = request.GET.get('sort', 'total')
-    order = request.GET.get('order', 'desc')
+    # ФИЛЬТР ПО ТИПУ РЕЙТИНГА
+    rating_type = request.GET.get('rating_type', 'all')
 
-    # Аннотации
-    books = books.annotate(
-        reviews_count=Count('reviews', filter=Q(
-            Q(reviews__character_depth__isnull=False) |
-            Q(reviews__idea_reveal__isnull=False) |
-            Q(reviews__readability__isnull=False) |
-            Q(reviews__relevance__isnull=False) |
-            Q(reviews__overall_impression__isnull=False)
-        )),
-        avg_character=Avg('reviews__character_depth'),
-        avg_idea=Avg('reviews__idea_reveal'),
-        avg_readability=Avg('reviews__readability'),
-        avg_relevance=Avg('reviews__relevance'),
-        avg_impression=Avg('reviews__overall_impression'),
-    )
+    # Получаем всех пользователей с is_staff
+    staff_users = User.objects.filter(is_staff=True)
+    regular_users = User.objects.filter(is_staff=False)
+
+    # Аннотации в зависимости от типа рейтинга
+    if rating_type == 'staff':
+        # Только оценки персонала
+        books = books.annotate(
+            reviews_count=Count('reviews', filter=Q(
+                reviews__user__in=staff_users,
+                reviews__character_depth__isnull=False
+            ) | Q(
+                reviews__user__in=staff_users,
+                reviews__idea_reveal__isnull=False
+            ) | Q(
+                reviews__user__in=staff_users,
+                reviews__readability__isnull=False
+            ) | Q(
+                reviews__user__in=staff_users,
+                reviews__relevance__isnull=False
+            ) | Q(
+                reviews__user__in=staff_users,
+                reviews__overall_impression__isnull=False
+            )),
+            avg_character=Avg('reviews__character_depth', filter=Q(reviews__user__in=staff_users)),
+            avg_idea=Avg('reviews__idea_reveal', filter=Q(reviews__user__in=staff_users)),
+            avg_readability=Avg('reviews__readability', filter=Q(reviews__user__in=staff_users)),
+            avg_relevance=Avg('reviews__relevance', filter=Q(reviews__user__in=staff_users)),
+            avg_impression=Avg('reviews__overall_impression', filter=Q(reviews__user__in=staff_users)),
+        )
+    elif rating_type == 'users':
+        # Только оценки обычных пользователей
+        books = books.annotate(
+            reviews_count=Count('reviews', filter=Q(
+                reviews__user__in=regular_users,
+                reviews__character_depth__isnull=False
+            ) | Q(
+                reviews__user__in=regular_users,
+                reviews__idea_reveal__isnull=False
+            ) | Q(
+                reviews__user__in=regular_users,
+                reviews__readability__isnull=False
+            ) | Q(
+                reviews__user__in=regular_users,
+                reviews__relevance__isnull=False
+            ) | Q(
+                reviews__user__in=regular_users,
+                reviews__overall_impression__isnull=False
+            )),
+            avg_character=Avg('reviews__character_depth', filter=Q(reviews__user__in=regular_users)),
+            avg_idea=Avg('reviews__idea_reveal', filter=Q(reviews__user__in=regular_users)),
+            avg_readability=Avg('reviews__readability', filter=Q(reviews__user__in=regular_users)),
+            avg_relevance=Avg('reviews__relevance', filter=Q(reviews__user__in=regular_users)),
+            avg_impression=Avg('reviews__overall_impression', filter=Q(reviews__user__in=regular_users)),
+        )
+    else:
+        # Все оценки
+        books = books.annotate(
+            reviews_count=Count('reviews', filter=Q(
+                Q(reviews__character_depth__isnull=False) |
+                Q(reviews__idea_reveal__isnull=False) |
+                Q(reviews__readability__isnull=False) |
+                Q(reviews__relevance__isnull=False) |
+                Q(reviews__overall_impression__isnull=False)
+            )),
+            avg_character=Avg('reviews__character_depth'),
+            avg_idea=Avg('reviews__idea_reveal'),
+            avg_readability=Avg('reviews__readability'),
+            avg_relevance=Avg('reviews__relevance'),
+            avg_impression=Avg('reviews__overall_impression'),
+        )
 
     # Общий балл
     books = books.annotate(
         total_avg=(
-            F('avg_character') + F('avg_idea') + F('avg_readability') +
-            F('avg_relevance') + F('avg_impression')
-        ) / 5
+                          F('avg_character') + F('avg_idea') + F('avg_readability') +
+                          F('avg_relevance') + F('avg_impression')
+                  ) / 5
     )
+    # Фильтрация по типу рейтинга
+    if rating_type == 'staff':
+        # Только книги, у которых есть оценки от персонала
+        books = books.filter(reviews_count__gt=0)
+    elif rating_type == 'users':
+        # Только книги, у которых есть оценки от читателей
+        books = books.filter(reviews_count__gt=0)
+    else:  # 'all'
+        # Все книги (включая без оценок)
+        pass  # Не фильтруем
 
-    # Применяем сортировку
+    # Сортировка
+    sort_by = request.GET.get('sort', 'total')
+    order = request.GET.get('order', 'desc')
     order_prefix = '' if order == 'asc' else '-'
     sort_fields = {
         'title': 'title',
@@ -306,12 +376,10 @@ def top_books(request):
         ],
         'search_query': search_query,
         'current_status': status_filter,
+        'rating_type': rating_type,
     }
 
     return render(request, 'books/top_books.html', context)
-
-
-# books/views.py
 
 def book_detail(request, book_id):
     """Страница книги с оценками и рецензиями"""
@@ -331,7 +399,14 @@ def book_detail(request, book_id):
     reviews_with_ratings = [r for r in all_reviews if r.has_rating]
 
     # Для блока рецензий - только те, у которых есть текст
-    reviews_with_comments = [r for r in all_reviews if r.comment]
+    reviews_with_comments = []
+    for review in all_reviews:
+        if review.comment:
+            # Используем обычные атрибуты, не свойства
+            review.likes_count_attr = review.likes.count()
+            review.dislikes_count_attr = review.dislikes.count()
+            review.last_likers_attr = review.likes.all().order_by('-id')[:4]
+            reviews_with_comments.append(review)
 
     # Средние оценки (только на основе тех, у кого есть оценки)
     if reviews_with_ratings:
@@ -360,6 +435,7 @@ def book_detail(request, book_id):
         'avg_scores': avg_scores,
         'total_avg': total_avg,
         'reviews_count': len(reviews_with_ratings),
+
     }
 
     return render(request, 'books/book_detail.html', context)
@@ -491,6 +567,50 @@ def toggle_favorite(request, book_id):
         })
 
     return redirect('books:book_detail', book_id=book.id)
+
+
+@login_required
+def toggle_review_reaction(request, review_id):
+    """Лайк/дизлайк рецензии"""
+    review = get_object_or_404(Review, id=review_id)
+    reaction = request.POST.get('reaction')  # 'like' или 'dislike'
+
+    if reaction == 'like':
+        if request.user in review.likes.all():
+            review.likes.remove(request.user)
+            user_reaction = None
+        else:
+            review.likes.add(request.user)
+            review.dislikes.remove(request.user)  # убираем дизлайк если был
+            user_reaction = 'like'
+    elif reaction == 'dislike':
+        if request.user in review.dislikes.all():
+            review.dislikes.remove(request.user)
+            user_reaction = None
+        else:
+            review.dislikes.add(request.user)
+            review.likes.remove(request.user)  # убираем лайк если был
+            user_reaction = 'dislike'
+    else:
+        return JsonResponse({'error': 'Invalid reaction'}, status=400)
+
+    # Собираем данные для аватарок (только если есть лайки)
+    likers_data = []
+    if review.likes_count > 0:
+        for liker in review.last_likers:
+            likers_data.append({
+                'avatar_url': liker.avatar.url if liker.avatar else None,
+                'username': liker.username,
+                'initial': liker.first_name[0] if liker.first_name else liker.username[0].upper()
+            })
+
+    return JsonResponse({
+        'success': True,
+        'likes_count': review.likes_count,
+        'dislikes_count': review.dislikes_count,
+        'likers': likers_data,
+        'user_reaction': user_reaction,
+    })
 
 
 

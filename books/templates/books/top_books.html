@@ -135,7 +135,28 @@
                         </button>
                     </div>
                 </div>
-
+                <!-- Тип рейтинга -->
+<div class="col-md-auto">
+    <div class="d-flex align-items-center">
+        <h6 class="mb-0 me-2 fw-bold" style="min-width: 60px; color: #d88c8c;">
+            <i class="fas fa-chart-line me-1"></i> Тип оценки:
+        </h6>
+        <div class="btn-group btn-group-sm" role="group">
+            <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if current_status and current_status != 'all' %}status={{ current_status }}&{% endif %}rating_type=all"
+               class="btn {% if rating_type == 'all' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                Все
+            </a>
+            <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if current_status and current_status != 'all' %}status={{ current_status }}&{% endif %}rating_type=staff"
+               class="btn {% if rating_type == 'staff' %}btn-warning{% else %}btn-outline-warning{% endif %}">
+                ⭐ Клуб
+            </a>
+            <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if current_status and current_status != 'all' %}status={{ current_status }}&{% endif %}rating_type=users"
+               class="btn {% if rating_type == 'users' %}btn-info{% else %}btn-outline-info{% endif %}">
+                📖 Читатели
+            </a>
+        </div>
+    </div>
+</div>
                 <!-- Результаты поиска (если есть) -->
                 {% if search_query %}
                 <div class="col-md-auto ms-auto">
@@ -157,7 +178,7 @@
                 <tr>
                     <th width="5%">#</th>
                     <th width="15%">
-                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if current_status and current_status != 'all' %}status={{ current_status }}&{% endif %}sort=title&order={% if sort_by == 'title' %}{{ next_order }}{% else %}desc{% endif %}"
+                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if current_status and current_status != 'all' %}status={{ current_status }}&{% endif %}{% if rating_type and rating_type != 'all' %}rating_type={{ rating_type }}&{% endif %}sort=title&order={% if sort_by == 'title' %}{{ next_order }}{% else %}desc{% endif %}"
                            class="text-white text-decoration-none">
                             Название
                             {% if sort_by == 'title' %}
@@ -166,7 +187,7 @@
                         </a>
                     </th>
                     <th width="12%">
-                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if current_status and current_status != 'all' %}status={{ current_status }}&{% endif %}sort=author&order={% if sort_by == 'author' %}{{ next_order }}{% else %}desc{% endif %}"
+                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if current_status and current_status != 'all' %}status={{ current_status }}&{% endif %}{% if rating_type and rating_type != 'all' %}rating_type={{ rating_type }}&{% endif %}sort=author&order={% if sort_by == 'author' %}{{ next_order }}{% else %}desc{% endif %}"
                            class="text-white text-decoration-none">
                             Автор
                             {% if sort_by == 'author' %}
@@ -175,7 +196,7 @@
                         </a>
                     </th>
                     <th width="10%">
-                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if current_status and current_status != 'all' %}status={{ current_status }}&{% endif %}sort=genre&order={% if sort_by == 'genre' %}{{ next_order }}{% else %}desc{% endif %}"
+                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if current_status and current_status != 'all' %}status={{ current_status }}&{% endif %}{% if rating_type and rating_type != 'all' %}rating_type={{ rating_type }}&{% endif %}sort=genre&order={% if sort_by == 'genre' %}{{ next_order }}{% else %}desc{% endif %}"
                            class="text-white text-decoration-none">
                             Жанр
                             {% if sort_by == 'genre' %}
@@ -184,7 +205,7 @@
                         </a>
                     </th>
                     <th width="6%">
-                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if current_status and current_status != 'all' %}status={{ current_status }}&{% endif %}sort=reviews&order={% if sort_by == 'reviews' %}{{ next_order }}{% else %}desc{% endif %}"
+                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if current_status and current_status != 'all' %}status={{ current_status }}&{% endif %}{% if rating_type and rating_type != 'all' %}rating_type={{ rating_type }}&{% endif %}sort=reviews&order={% if sort_by == 'reviews' %}{{ next_order }}{% else %}desc{% endif %}"
                            class="text-white text-decoration-none">
                             <i class="fas fa-star"></i>
                             {% if sort_by == 'reviews' %}
@@ -193,7 +214,7 @@
                         </a>
                     </th>
                     <th width="8%">
-                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if current_status and current_status != 'all' %}status={{ current_status }}&{% endif %}sort=character&order={% if sort_by == 'character' %}{{ next_order }}{% else %}desc{% endif %}"
+                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if current_status and current_status != 'all' %}status={{ current_status }}&{% endif %}{% if rating_type and rating_type != 'all' %}rating_type={{ rating_type }}&{% endif %}sort=character&order={% if sort_by == 'character' %}{{ next_order }}{% else %}desc{% endif %}"
                            class="text-white text-decoration-none">
                             Персонажи
                             {% if sort_by == 'character' %}
@@ -202,7 +223,7 @@
                         </a>
                     </th>
                     <th width="8%">
-                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if current_status and current_status != 'all' %}status={{ current_status }}&{% endif %}sort=idea&order={% if sort_by == 'idea' %}{{ next_order }}{% else %}desc{% endif %}"
+                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if current_status and current_status != 'all' %}status={{ current_status }}&{% endif %}{% if rating_type and rating_type != 'all' %}rating_type={{ rating_type }}&{% endif %}sort=idea&order={% if sort_by == 'idea' %}{{ next_order }}{% else %}desc{% endif %}"
                            class="text-white text-decoration-none">
                             Идея
                             {% if sort_by == 'idea' %}
@@ -211,7 +232,7 @@
                         </a>
                     </th>
                     <th width="8%">
-                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if current_status and current_status != 'all' %}status={{ current_status }}&{% endif %}sort=readability&order={% if sort_by == 'readability' %}{{ next_order }}{% else %}desc{% endif %}"
+                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if current_status and current_status != 'all' %}status={{ current_status }}&{% endif %}{% if rating_type and rating_type != 'all' %}rating_type={{ rating_type }}&{% endif %}sort=readability&order={% if sort_by == 'readability' %}{{ next_order }}{% else %}desc{% endif %}"
                            class="text-white text-decoration-none">
                             Читаемость
                             {% if sort_by == 'readability' %}
@@ -220,7 +241,7 @@
                         </a>
                     </th>
                     <th width="8%">
-                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if current_status and current_status != 'all' %}status={{ current_status }}&{% endif %}sort=relevance&order={% if sort_by == 'relevance' %}{{ next_order }}{% else %}desc{% endif %}"
+                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if current_status and current_status != 'all' %}status={{ current_status }}&{% endif %}{% if rating_type and rating_type != 'all' %}rating_type={{ rating_type }}&{% endif %}sort=relevance&order={% if sort_by == 'relevance' %}{{ next_order }}{% else %}desc{% endif %}"
                            class="text-white text-decoration-none">
                             Актуальность
                             {% if sort_by == 'relevance' %}
@@ -229,7 +250,7 @@
                         </a>
                     </th>
                     <th width="8%">
-                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if current_status and current_status != 'all' %}status={{ current_status }}&{% endif %}sort=impression&order={% if sort_by == 'impression' %}{{ next_order }}{% else %}desc{% endif %}"
+                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if current_status and current_status != 'all' %}status={{ current_status }}&{% endif %}{% if rating_type and rating_type != 'all' %}rating_type={{ rating_type }}&{% endif %}sort=impression&order={% if sort_by == 'impression' %}{{ next_order }}{% else %}desc{% endif %}"
                            class="text-white text-decoration-none">
                             Впечатление
                             {% if sort_by == 'impression' %}
@@ -238,7 +259,7 @@
                         </a>
                     </th>
                     <th width="8%">
-                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if current_status and current_status != 'all' %}status={{ current_status }}&{% endif %}sort=total&order={% if sort_by == 'total' %}{{ next_order }}{% else %}desc{% endif %}"
+                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if current_status and current_status != 'all' %}status={{ current_status }}&{% endif %}{% if rating_type and rating_type != 'all' %}rating_type={{ rating_type }}&{% endif %}sort=total&order={% if sort_by == 'total' %}{{ next_order }}{% else %}desc{% endif %}"
                            class="text-white text-decoration-none">
                             <i class="fas fa-crown"></i> Балл
                             {% if sort_by == 'total' %}
@@ -297,28 +318,48 @@
                         {% with total=book.total_avg %}
                             {% if total >= 9 %}
                                 <span class="badge" style="background: linear-gradient(135deg, #FFD700, #FFA500); color: black; font-size: 18px; padding: 8px 15px; box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);">
-                                    <i class="fas fa-crown me-1"></i>{{ book.total_avg|floatformat:1 }}
-                                </span>
-                            {% elif total >= 8 %}
-                                <span class="badge" style="background: linear-gradient(135deg, #FFD700, #B8860B); color: black; font-size: 18px; padding: 8px 15px;">
-                                    <i class="fas fa-star me-1"></i>{{ book.total_avg|floatformat:1 }}
-                                </span>
-                            {% elif total >= 7 %}
-                                <span class="badge" style="background: linear-gradient(135deg, #C0C0C0, #808080); color: black; font-size: 18px; padding: 8px 15px;">
-                                    <i class="fas fa-medal me-1"></i>{{ book.total_avg|floatformat:1 }}
-                                </span>
-                            {% elif total >= 6 %}
-                                <span class="badge" style="background: linear-gradient(135deg, #CD7F32, #8B4513); color: black; font-size: 18px; padding: 8px 15px;">
-                                    <i class="fas fa-shield-alt me-1"></i>{{ book.total_avg|floatformat:1 }}
-                                </span>
-                            {% elif total >= 5 %}
-                                <span class="badge" style="background: linear-gradient(135deg, #A0A0A0, #6c757d); color: black; font-size: 18px; padding: 8px 15px;">
-                                    <i class="fas fa-hammer me-1"></i>{{ book.total_avg|floatformat:1 }}
-                                </span>
-                            {% else %}
-                                <span class="badge" style="background: linear-gradient(135deg, #f0f0f0, #d0d0d0); color: black; font-size: 18px; padding: 8px 15px;">
-                                    <i class="far fa-question-circle me-1"></i>—
-                                </span>
+                <i class="fas fa-crown me-1"></i>{{ book.total_avg|floatformat:1 }}
+            </span>
+        {% elif total >= 8 %}
+            <span class="badge" style="background: linear-gradient(135deg, #FFD700, #B8860B); color: black; font-size: 18px; padding: 8px 15px;">
+                <i class="fas fa-star me-1"></i>{{ book.total_avg|floatformat:1 }}
+            </span>
+        {% elif total >= 7 %}
+            <span class="badge" style="background: linear-gradient(135deg, #C0C0C0, #808080); color: black; font-size: 18px; padding: 8px 15px;">
+                <i class="fas fa-medal me-1"></i>{{ book.total_avg|floatformat:1 }}
+            </span>
+        {% elif total >= 6 %}
+            <span class="badge" style="background: linear-gradient(135deg, #CD7F32, #8B4513); color: black; font-size: 18px; padding: 8px 15px;">
+                <i class="fas fa-shield-alt me-1"></i>{{ book.total_avg|floatformat:1 }}
+            </span>
+        {% elif total >= 5 %}
+            <span class="badge" style="background: linear-gradient(135deg, #A0A0A0, #6c757d); color: black; font-size: 18px; padding: 8px 15px;">
+                <i class="fas fa-hammer me-1"></i>{{ book.total_avg|floatformat:1 }}
+            </span>
+        {% elif total >= 4 %}
+            <span class="badge" style="background: linear-gradient(135deg, #8B4513, #A0522D); color: black; font-size: 18px; padding: 8px 15px;">
+                <i class="fas fa-leaf me-1"></i>{{ book.total_avg|floatformat:1 }}
+            </span>
+        {% elif total >= 3 %}
+            <span class="badge" style="background: linear-gradient(135deg, #2E8B57, #3CB371); color: black; font-size: 18px; padding: 8px 15px;">
+                <i class="fas fa-tree me-1"></i>{{ book.total_avg|floatformat:1 }}
+            </span>
+        {% elif total >= 2 %}
+            <span class="badge" style="background: linear-gradient(135deg, #4682B4, #5F9EA0); color: black; font-size: 18px; padding: 8px 15px;">
+                <i class="fas fa-water me-1"></i>{{ book.total_avg|floatformat:1 }}
+            </span>
+        {% elif total >= 1 %}
+            <span class="badge" style="background: linear-gradient(135deg, #8B008B, #9400D3); color: black; font-size: 18px; padding: 8px 15px;">
+                <i class="fas fa-moon me-1"></i>{{ book.total_avg|floatformat:1 }}
+            </span>
+        {% elif total > 0 %}
+            <span class="badge" style="background: linear-gradient(135deg, #CD5C5C, #F08080); color: black; font-size: 18px; padding: 8px 15px;">
+                <i class="fas fa-fire me-1"></i>{{ book.total_avg|floatformat:1 }}
+            </span>
+        {% else %}
+            <span class="badge" style="background: linear-gradient(135deg, #f0f0f0, #d0d0d0); color: black; font-size: 18px; padding: 8px 15px;">
+                <i class="far fa-question-circle me-1"></i>—
+            </span>
                             {% endif %}
                         {% endwith %}
                     </td>

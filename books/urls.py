@@ -17,5 +17,6 @@ urlpatterns = [
     # Новые URL для отдельного удаления
     path('book/<int:book_id>/delete-rating/', views.delete_rating, name='delete_rating'),
     path('book/<int:book_id>/delete-comment/', views.delete_comment, name='delete_comment'),
+    path('review/<int:review_id>/react/', views.toggle_review_reaction, name='toggle_review_reaction'),
 
 ]

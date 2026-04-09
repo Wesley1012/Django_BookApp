@@ -3,6 +3,35 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'users/css/members_list.css' %}">
+<style>
+    /* Стиль для значка персонала */
+    .staff-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, #ffd700, #ff8c00);
+        color: #000;
+        font-size: 12px;
+        font-weight: bold;
+        padding: 2px 8px;
+        border-radius: 20px;
+        margin-left: 8px;
+        vertical-align: middle;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .staff-badge i {
+        margin-right: 4px;
+        font-size: 11px;
+    }
+
+    /* Стиль для строки администратора */
+    .staff-row {
+        background-color: rgba(255, 215, 0, 0.05);
+    }
+
+    .staff-row:hover {
+        background-color: rgba(255, 215, 0, 0.1) !important;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -40,7 +69,6 @@
                                     {% endif %}
                                 </button>
                             </th>
-
                             <th width="15%">
                                 <button class="sort-btn" data-sort="approved_submissions" data-current-order="{% if sort_by == 'approved_submissions' %}{{ order }}{% else %}asc{% endif %}">
                                     Книг предложил
@@ -53,7 +81,6 @@
                                     {% endif %}
                                 </button>
                             </th>
-
                             <th width="15%">
                                 <button class="sort-btn" data-sort="reviews" data-current-order="{% if sort_by == 'reviews' %}{{ order }}{% else %}asc{% endif %}">
                                     Книг оценено
@@ -66,7 +93,6 @@
                                     {% endif %}
                                 </button>
                             </th>
-
                             <th width="15%">
                                 <button class="sort-btn" data-sort="favorites" data-current-order="{% if sort_by == 'favorites' %}{{ order }}{% else %}asc{% endif %}">
                                     Книг в избранном
@@ -79,10 +105,11 @@
                                     {% endif %}
                                 </button>
                             </th>
+                        </tr>
                     </thead>
                     <tbody id="members-table-body">
                         {% for stats in user_stats %}
-                        <tr>
+                        <tr class="{% if stats.user.is_staff %}staff-row{% endif %}">
                             <!-- Аватар -->
                             <td>
                                 <a href="{% url 'user_profile' stats.user.id %}">
@@ -102,12 +129,17 @@
                                 </a>
                             </td>
 
-                            <!-- Имя и email -->
+                            <!-- Имя и email + значок персонала -->
                             <td>
                                 <a href="{% if stats.user == request.user %}{% url 'my_profile' %}{% else %}{% url 'user_profile' stats.user.id %}{% endif %}"
                                    class="text-decoration-none">
                                     <strong>{{ stats.user.get_full_name|default:stats.user.email }}</strong>
                                 </a>
+                                {% if stats.user.is_staff %}
+                                    <span class="staff-badge" title="Администратор / Модератор">
+                                        <i class="fas fa-crown"></i> Участник клуба
+                                    </span>
+                                {% endif %}
                             </td>
 
                             <!-- Дата регистрации -->
@@ -159,6 +191,23 @@
         <div class="footer-text">© Киря и Ваня</div>
     </div>
 </div>
+
+<script>
+// Сохраняем позицию скролла
+document.querySelectorAll('form').forEach(form => {
+    form.addEventListener('submit', function() {
+        sessionStorage.setItem('wheelScroll', window.scrollY);
+    });
+});
+
+window.addEventListener('load', function() {
+    const savedScroll = sessionStorage.getItem('wheelScroll');
+    if (savedScroll) {
+        window.scrollTo(0, parseInt(savedScroll));
+        sessionStorage.removeItem('wheelScroll');
+    }
+});
+</script>
 
 {% endblock %}
 

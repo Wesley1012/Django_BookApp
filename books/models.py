@@ -281,12 +281,26 @@ class Review(models.Model):
         verbose_name="Редактировалась"
     )
 
+    likes = models.ManyToManyField(
+        User,
+        related_name='liked_reviews',
+        blank=True,
+        verbose_name="Лайки"
+    )
+    dislikes = models.ManyToManyField(
+        User,
+        related_name='disliked_reviews',
+        blank=True,
+        verbose_name="Дизлайки"
+    )
+
     # Даты
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.user.username} → {self.book.title}"
+
 
     @property
     def has_rating(self):
@@ -312,6 +326,19 @@ class Review(models.Model):
             self.overall_impression
         ] if s is not None]
         return sum(scores) / len(scores) if scores else None
+
+    @property
+    def likes_count(self):
+        return self.likes.count()
+
+    @property
+    def dislikes_count(self):
+        return self.dislikes.count()
+
+    @property
+    def last_likers(self):
+        """Последние 4 пользователя, которые лайкнули"""
+        return self.likes.all().order_by('-id')[:4]
 
     class Meta:
         unique_together = ['book', 'user']
