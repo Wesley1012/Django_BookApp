@@ -3,22 +3,67 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'users/css/home.css' %}">
+
 {% endblock %}
 
 {% block content %}
 
-
-<!-- 1. Навигационная кнопка (фиксированная справа) -->
+<!-- 1. Навигационные кнопки (фиксированные справа) -->
 <div id="rec1855442171" class="r t-rec" data-record-type="393">
     <div id="nav1855442171" class="t393 t393__positionfixed">
-        <div class="t393__wrapper">
-            <form action="{% url 'account_logout' %}" method="post">
-                {% csrf_token %}
-                <button type="submit" class="t-btn t-btnflex t-btnflex_type_button t-btnflex_md t393_btn">
-                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                </button>
+        <div class="t393__wrapper" style="display: flex; gap: 10px;">
+            <!-- Кнопка уведомлений -->
+            {% if user.is_authenticated %}
+            <button class="notification-btn" id="notificationBtn">
+                <i class="fas fa-bell"></i>
+                {% if unread_count > 0 %}
+                <span class="notification-badge">{{ unread_count }}</span>
+                {% endif %}
+            </button>
+            {% endif %}
+
+            <!-- Кнопка выхода -->
+            <form action="{% url 'account_logout' %}" method="post" style="margin: 0;">
+            {% csrf_token %}
+            <button type="submit" class="t-btn t-btnflex t-btnflex_type_button t-btnflex_md t393_btn">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            </button>
             </form>
         </div>
+    </div>
+</div>
+
+<!-- Выпадающее окно уведомлений -->
+<div class="notification-dropdown" id="notificationDropdown">
+    <div class="notification-header">
+        <span>📢 События в клубе</span>
+        <button class="mark-read-btn" id="markAllReadBtn">✓ Все прочитаны</button>
+    </div>
+    <div class="notification-list" id="notificationList">
+        {% for event in recent_events %}
+        <div class="notification-item {% if not event.is_read %}unread{% endif %}" data-event-id="{{ event.id }}">
+            <div class="d-flex align-items-center">
+                <div class="notification-icon" style="background: {% if event.event_type == 'user_registered' %}linear-gradient(135deg, #667eea, #764ba2){% elif event.event_type == 'book_added' %}linear-gradient(135deg, #f6c0c0, #d88c8c){% elif event.event_type == 'review_written' %}linear-gradient(135deg, #28a745, #20c997){% else %}linear-gradient(135deg, #ffc107, #fd7e14){% endif %}">
+                    <i class="fas {% if event.event_type == 'user_registered' %}fa-user-plus{% elif event.event_type == 'book_added' %}fa-book{% elif event.event_type == 'review_written' %}fa-comment{% else %}fa-heart{% endif %}"></i>
+                </div>
+                <div class="notification-content">
+                    <div class="notification-text">
+                        <strong>{{ event.user.get_full_name|default:event.user.username }}</strong>
+                        {{ event.get_event_type_display|lower }}
+                        {% if event.target %}
+                            "{{ event.target|truncatechars:30 }}"
+                        {% endif %}
+                    </div>
+                    <div class="notification-time">{{ event.created_at|timesince }} назад</div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="notification-empty">
+            <i class="fas fa-bell-slash" style="font-size: 32px; margin-bottom: 10px; display: block;"></i>
+            Пока нет событий
+        </div>
+        {% endfor %}
     </div>
 </div>
 
@@ -199,4 +244,70 @@
 
 {% block extra_js %}
 <script src="{% static 'users/js/home.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const notificationBtn = document.getElementById('notificationBtn');
+    const notificationDropdown = document.getElementById('notificationDropdown');
+    let isOpened = false;
+
+    // Открытие/закрытие выпадающего окна
+    if (notificationBtn && notificationDropdown) {
+        notificationBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            notificationDropdown.classList.toggle('show');
+
+            // Если открыли уведомления и они не были отмечены как прочитанные
+            if (notificationDropdown.classList.contains('show') && !isOpened) {
+                isOpened = true;
+
+                // Отправляем запрос на сервер, чтобы отметить все как прочитанные
+                fetch('{% url "mark_events_read" %}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Скрываем бейдж
+                        const badge = notificationBtn.querySelector('.notification-badge');
+                        if (badge) {
+                            badge.style.display = 'none';
+                        }
+                    }
+                });
+            }
+        });
+
+        // Закрытие при клике вне окна
+        document.addEventListener('click', function(e) {
+            if (!notificationBtn.contains(e.target) && !notificationDropdown.contains(e.target)) {
+                notificationDropdown.classList.remove('show');
+            }
+        });
+    }
+
+    // Кнопка "Все прочитаны"
+    const markAllReadBtn = document.getElementById('markAllReadBtn');
+    if (markAllReadBtn) {
+        markAllReadBtn.addEventListener('click', function() {
+            fetch('{% url "mark_events_read" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                }
+            });
+        });
+    }
+});
+</script>
 {% endblock %}

@@ -4,14 +4,12 @@ from easy_thumbnails.fields import ThumbnailerImageField
 from django.urls import reverse
 import os
 
-
-
 class User(AbstractUser):
 
     ROLE_CHOICES = [
-        ('staff', 'Персонал клуба'),  # Члены клуба (бывший is_staff)
-        ('active', 'Активный читатель'),  # Обычные зарегистрированные пользователи
-        ('guest', 'Гость'),  # Незарегистрированные (только просмотр)
+        ('staff', 'Персонал клуба'),
+        ('active', 'Активный читатель'),
+        ('guest', 'Гость'),
     ]
 
     role = models.CharField(
@@ -183,3 +181,24 @@ class User(AbstractUser):
         if self.avatar and hasattr(self.avatar, 'path'):
             if os.path.isfile(self.avatar.path):
                 os.remove(self.avatar.path)
+
+
+class ClubEvent(models.Model):
+    EVENT_TYPES = [
+        ('user_registered', 'Новый участник'),
+        ('book_added', 'Добавлена книга'),
+        ('review_written', 'Написана рецензия'),
+        ('book_favorited', 'Книга добавлена в избранное'),
+    ]
+
+    event_type = models.CharField(max_length=50, choices=EVENT_TYPES)
+    user = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='events')
+    target = models.CharField(max_length=255, blank=True, null=True)  # Название книги/рецензии
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.get_event_type_display()}"

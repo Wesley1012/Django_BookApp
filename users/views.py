@@ -8,7 +8,8 @@ from django.contrib.auth.models import User
 from .forms import ProfileUpdateForm
 from django.views.decorators.http import require_POST
 from django.core.files.base import ContentFile
-
+from .models import ClubEvent
+from django.http import JsonResponse
 import re, time, base64
 
 User = get_user_model()
@@ -19,7 +20,6 @@ class Register(View):
     template_name = 'registration/register.html'
 
     def get(self, request):
-
         context = {
             'form': UserCreationForm()
         }
@@ -29,11 +29,20 @@ class Register(View):
         form = UserCreationForm(request.POST)
 
         if form.is_valid():
-            form.save()
+            user = form.save()  # Сохраняем пользователя
             email = form.cleaned_data.get('email')
             password = form.cleaned_data.get('password1')
             user = authenticate(username=email, password=password)
             login(request, user)
+
+            # 👇 ДОБАВЛЯЕМ СОБЫТИЕ РЕГИСТРАЦИИ
+            ClubEvent.objects.create(
+                event_type='user_registered',
+                user=user,
+                target=None,
+                is_read=False
+            )
+
             return redirect('/users/')
         context = {
             'form': form
@@ -256,8 +265,25 @@ def user_profile(request, user_id):
 
 
 def home(request):
-    return render(request, 'home.html', {'tilda_style': True})
+    if request.user.is_authenticated:
+        # Получаем последние 10 событий
+        recent_events = ClubEvent.objects.all()[:10]
+        unread_count = ClubEvent.objects.filter(is_read=False).count()
+    else:
+        recent_events = []
+        unread_count = 0
 
+    return render(request, 'home.html', {
+        'recent_events': recent_events,
+        'unread_count': unread_count,
+        'tilda_style': True})
+
+@login_required
+def mark_events_read(request):
+    if request.method == 'POST':
+        ClubEvent.objects.filter(is_read=False).update(is_read=True)
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False})
 
 @login_required
 def edit_profile(request):

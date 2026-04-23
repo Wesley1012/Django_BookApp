@@ -14,6 +14,7 @@ urlpatterns = [
     path('profile/<int:user_id>/', views.user_profile, name='user_profile'),
     path('members/', views.members_list, name='members_list'),
     path('avatar/delete/', views.delete_avatar, name='delete_avatar'),
+    path('mark-events-read/', views.mark_events_read, name='mark_events_read'),
 
 ]
 

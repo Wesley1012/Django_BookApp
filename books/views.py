@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.contrib import messages
 from .forms import BookSubmissionForm, BookSubmissionAdminForm, ReviewForm
 from .models import BookSubmission, Book, Review, FavoriteBook
+from users.models import ClubEvent
 from django.shortcuts import get_object_or_404
 from django.db.models import Count, Avg, F, Q
 from django.views.decorators.http import require_POST
@@ -19,16 +20,10 @@ def submit_book(request):
         form = BookSubmissionForm(request.POST, request.FILES)
 
         if form.is_valid():
-            # Сохраняем форму без коммита
             submission = form.save(commit=False)
-
-            # Автоматически проставляем пользователя
             submission.submitted_by = request.user
-
-            # Автоматически ставим статус "на рассмотрении"
             submission.status = 'pending'
 
-            # Если не хотят оценивать - обнуляем оценки
             if not submission.want_rating:
                 submission.plot_rating = 0
                 submission.characters_rating = 0
@@ -36,16 +31,12 @@ def submit_book(request):
                 submission.originality_rating = 0
                 submission.impression_rating = 0
 
-            # Сохраняем в БД
             submission.save()
-
-            # Сохраняем ManyToMany если есть (в данном случае нет)
             form.save_m2m()
 
             messages.success(request, '✅ Книга успешно предложена! Ожидайте проверки администратором.')
             return redirect('home')
         else:
-            # Показываем ошибки формы
             messages.error(request, '❌ Пожалуйста, исправьте ошибки в форме.')
             for field, errors in form.errors.items():
                 for error in errors:
@@ -83,12 +74,11 @@ def edit_submission(request, submission_id):
                         description=submission.description,
                         submission=submission,
                         cover_url=submission.cover_url,
-                        genre=submission.genre,  # копируем жанр
+                        genre=submission.genre,
                         is_club_book=submission.is_club_book,
                         is_active=True
                     )
 
-                    # Копируем обложку если есть
                     if submission.cover:
                         book.cover.save(
                             submission.cover.name,
@@ -97,7 +87,7 @@ def edit_submission(request, submission_id):
                         )
 
                     # Рецензия из предложки
-                    if submission.review:  # Убрали проверку submission.want_rating
+                    if submission.review:
                         Review.objects.create(
                             book=book,
                             user=submission.submitted_by,
@@ -117,6 +107,14 @@ def edit_submission(request, submission_id):
                             book=book,
                             defaults={'note': 'Добавлено при предложке книги'}
                         )
+
+                    # 👇 ДОБАВЛЯЕМ СОБЫТИЕ (ПРАВИЛЬНОЕ МЕСТО!)
+                    ClubEvent.objects.create(
+                        event_type='book_added',
+                        user=submission.submitted_by,
+                        target=submission.title,
+                        is_read=False
+                    )
 
                     messages.success(request, '✅ Книга одобрена и добавлена в ТОП!')
                 else:
@@ -171,12 +169,11 @@ def approve_submission(request, submission_id):
             description=submission.description,
             submission=submission,
             cover_url=submission.cover_url,
-            genre=submission.genre,  # копируем жанр
+            genre=submission.genre,
             is_club_book=submission.is_club_book,
             is_active=True
         )
 
-        # Копируем обложку если есть
         if submission.cover:
             book.cover.save(
                 submission.cover.name,
@@ -185,7 +182,7 @@ def approve_submission(request, submission_id):
             )
 
         # Рецензия из предложки
-        if submission.review:  # Убрали проверку submission.want_rating
+        if submission.review:
             Review.objects.create(
                 book=book,
                 user=submission.submitted_by,
@@ -206,6 +203,14 @@ def approve_submission(request, submission_id):
                 defaults={'note': 'Добавлено при предложке книги'}
             )
 
+        # СОБЫТИЕ
+        ClubEvent.objects.create(
+            event_type='book_added',
+            user=submission.submitted_by,
+            target=submission.title,
+            is_read=False
+        )
+
     messages.success(request, f'✅ Книга "{submission.title}" одобрена!')
     return redirect('books:admin_submissions')
 
@@ -219,6 +224,7 @@ def reject_submission(request, submission_id):
     submission.save()
     messages.warning(request, f'❌ Книга "{submission.title}" отклонена.')
     return redirect('books:admin_submissions')
+
 
 
 def top_books(request):
@@ -451,17 +457,14 @@ def add_review(request, book_id):
         # Сохраняем оценку
         if 'save_rating' in request.POST:
             if existing_review:
-                # Обновляем существующую запись
                 existing_review.character_depth = request.POST.get('character_depth')
                 existing_review.idea_reveal = request.POST.get('idea_reveal')
                 existing_review.readability = request.POST.get('readability')
                 existing_review.relevance = request.POST.get('relevance')
                 existing_review.overall_impression = request.POST.get('overall_impression')
-                # Комментарий НЕ ТРОГАЕМ
                 existing_review.save()
                 messages.success(request, '✅ Оценка сохранена!')
             else:
-                # Создаем новую запись
                 Review.objects.create(
                     book=book,
                     user=request.user,
@@ -470,7 +473,7 @@ def add_review(request, book_id):
                     readability=request.POST.get('readability'),
                     relevance=request.POST.get('relevance'),
                     overall_impression=request.POST.get('overall_impression'),
-                    comment=''  # Пустой комментарий
+                    comment=''
                 )
                 messages.success(request, '✅ Оценка сохранена!')
 
@@ -481,14 +484,11 @@ def add_review(request, book_id):
             comment = request.POST.get('comment', '').strip()
 
             if existing_review:
-                # Обновляем существующую запись
                 existing_review.comment = comment
                 existing_review.is_edited = True
-                # Оценки НЕ ТРОГАЕМ
                 existing_review.save()
                 messages.success(request, '✅ Рецензия обновлена!')
             else:
-                # Создаем новую запись
                 Review.objects.create(
                     book=book,
                     user=request.user,
@@ -501,9 +501,19 @@ def add_review(request, book_id):
                 )
                 messages.success(request, '✅ Рецензия опубликована!')
 
+            # 👇 ДОБАВЛЯЕМ СОБЫТИЕ ДЛЯ НОВОЙ РЕЦЕНЗИИ
+            if comment:
+                ClubEvent.objects.create(
+                    event_type='review_written',
+                    user=request.user,
+                    target=book.title,
+                    is_read=False
+                )
+
             return redirect('books:book_detail', book_id=book.id)
 
     return redirect('books:book_detail', book_id=book.id)
+
 
 
 @login_required
@@ -538,7 +548,6 @@ def delete_comment(request, book_id):
     return redirect('books:book_detail', book_id=book.id)
 
 
-
 @login_required
 def toggle_favorite(request, book_id):
     """Добавить/удалить книгу из избранного"""
@@ -550,7 +559,6 @@ def toggle_favorite(request, book_id):
     )
 
     if not created:
-        # Если уже в избранном - удаляем
         favorite.delete()
         messages.success(request, f'Книга "{book.title}" удалена из избранного')
         is_favorite = False
@@ -558,7 +566,13 @@ def toggle_favorite(request, book_id):
         messages.success(request, f'Книга "{book.title}" добавлена в избранное!')
         is_favorite = True
 
-    # Возвращаем JSON для AJAX или редирект
+        ClubEvent.objects.create(
+            event_type='book_favorited',
+            user=request.user,
+            target=book.title,
+            is_read=False
+        )
+
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         from django.http import JsonResponse
         return JsonResponse({
