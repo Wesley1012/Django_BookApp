@@ -208,7 +208,7 @@ def approve_submission(request, submission_id):
             event_type='book_added',
             user=submission.submitted_by,
             target=submission.title,
-            is_read=False
+            target_id=book.id,
         )
 
     messages.success(request, f'✅ Книга "{submission.title}" одобрена!')
@@ -501,13 +501,13 @@ def add_review(request, book_id):
                 )
                 messages.success(request, '✅ Рецензия опубликована!')
 
-            # 👇 ДОБАВЛЯЕМ СОБЫТИЕ ДЛЯ НОВОЙ РЕЦЕНЗИИ
+
             if comment:
                 ClubEvent.objects.create(
                     event_type='review_written',
                     user=request.user,
                     target=book.title,
-                    is_read=False
+                    target_id=book.id,
                 )
 
             return redirect('books:book_detail', book_id=book.id)
@@ -570,7 +570,7 @@ def toggle_favorite(request, book_id):
             event_type='book_favorited',
             user=request.user,
             target=book.title,
-            is_read=False
+            target_id=book.id,
         )
 
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':

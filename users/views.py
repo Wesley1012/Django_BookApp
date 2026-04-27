@@ -266,9 +266,12 @@ def user_profile(request, user_id):
 
 def home(request):
     if request.user.is_authenticated:
-        # Получаем последние 10 событий
-        recent_events = ClubEvent.objects.all()[:10]
-        unread_count = ClubEvent.objects.filter(is_read=False).count()
+        recent_events = ClubEvent.objects.all().order_by('-created_at')[:10]
+
+        # Количество непрочитанных для текущего пользователя
+        unread_count = ClubEvent.objects.exclude(
+            read_by=request.user
+        ).count()
     else:
         recent_events = []
         unread_count = 0
@@ -276,12 +279,16 @@ def home(request):
     return render(request, 'home.html', {
         'recent_events': recent_events,
         'unread_count': unread_count,
-        'tilda_style': True})
+        'tilda_style': True
+    })
 
 @login_required
 def mark_events_read(request):
     if request.method == 'POST':
-        ClubEvent.objects.filter(is_read=False).update(is_read=True)
+        # Отмечаем все события как прочитанные для текущего пользователя
+        unread_events = ClubEvent.objects.exclude(read_by=request.user)
+        for event in unread_events:
+            event.read_by.add(request.user)
         return JsonResponse({'success': True})
     return JsonResponse({'success': False})
 
