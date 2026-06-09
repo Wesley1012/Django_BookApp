@@ -55,9 +55,9 @@
                 <table class="table table-hover" id="members-table">
                     <thead>
                         <tr>
-                            <th width="10%">Аватар</th>
-                            <th width="25%">Участник</th>
-                            <th width="15%">
+                            <th width="8%">Аватар</th>
+                            <th width="20%">Участник</th>
+                            <th width="12%">
                                 <button class="sort-btn" data-sort="date_joined" data-current-order="{% if sort_by == 'date_joined' %}{{ order }}{% else %}asc{% endif %}">
                                     Дата регистрации
                                     {% if sort_by == 'date_joined' %}
@@ -69,10 +69,10 @@
                                     {% endif %}
                                 </button>
                             </th>
-                            <th width="15%">
-                                <button class="sort-btn" data-sort="approved_submissions" data-current-order="{% if sort_by == 'approved_submissions' %}{{ order }}{% else %}asc{% endif %}">
-                                    Книг предложил
-                                    {% if sort_by == 'approved_submissions' %}
+                            <th width="12%">
+                                <button class="sort-btn" data-sort="books_in_top" data-current-order="{% if sort_by == 'books_in_top' %}{{ order }}{% else %}asc{% endif %}">
+                                    Книг в ТОПе
+                                    {% if sort_by == 'books_in_top' %}
                                         {% if order == 'asc' %}
                                             <i class="fas fa-sort-up"></i>
                                         {% else %}
@@ -81,10 +81,22 @@
                                     {% endif %}
                                 </button>
                             </th>
-                            <th width="15%">
-                                <button class="sort-btn" data-sort="reviews" data-current-order="{% if sort_by == 'reviews' %}{{ order }}{% else %}asc{% endif %}">
+                            <th width="12%">
+                                <button class="sort-btn" data-sort="reviews_with_text" data-current-order="{% if sort_by == 'reviews_with_text' %}{{ order }}{% else %}asc{% endif %}">
+                                    Рецензий
+                                    {% if sort_by == 'reviews_with_text' %}
+                                        {% if order == 'asc' %}
+                                            <i class="fas fa-sort-up"></i>
+                                        {% else %}
+                                            <i class="fas fa-sort-down"></i>
+                                        {% endif %}
+                                    {% endif %}
+                                </button>
+                            </th>
+                            <th width="12%">
+                                <button class="sort-btn" data-sort="rated_books" data-current-order="{% if sort_by == 'rated_books' %}{{ order }}{% else %}asc{% endif %}">
                                     Книг оценено
-                                    {% if sort_by == 'reviews' %}
+                                    {% if sort_by == 'rated_books' %}
                                         {% if order == 'asc' %}
                                             <i class="fas fa-sort-up"></i>
                                         {% else %}
@@ -93,9 +105,9 @@
                                     {% endif %}
                                 </button>
                             </th>
-                            <th width="15%">
+                            <th width="12%">
                                 <button class="sort-btn" data-sort="favorites" data-current-order="{% if sort_by == 'favorites' %}{{ order }}{% else %}asc{% endif %}">
-                                    Книг в избранном
+                                    В избранном
                                     {% if sort_by == 'favorites' %}
                                         {% if order == 'asc' %}
                                             <i class="fas fa-sort-up"></i>
@@ -150,17 +162,24 @@
                                 </div>
                             </td>
 
-                            <!-- Книг предложил -->
+                            <!-- Книг в ТОПе (которые добавил пользователь) -->
                             <td>
                                 <span class="badge bg-primary">
-                                    {{ stats.approved_submissions_count|default:0 }}
+                                    {{ stats.books_in_top_count|default:0 }}
                                 </span>
                             </td>
 
-                            <!-- Рецензий написано -->
+                            <!-- Рецензий (текстовых) -->
                             <td>
                                 <span class="badge bg-success">
-                                    {{ stats.reviews_count|default:0 }}
+                                    {{ stats.reviews_with_text_count|default:0 }}
+                                </span>
+                            </td>
+
+                            <!-- Книг оценено (есть оценки) -->
+                            <td>
+                                <span class="badge bg-warning">
+                                    {{ stats.rated_books_count|default:0 }}
                                 </span>
                             </td>
 
@@ -173,7 +192,7 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="6" class="text-center py-4">
+                            <td colspan="7" class="text-center py-4">
                                 <p class="text-muted">Пока нет участников</p>
                             </td>
                         </tr>

@@ -36,39 +36,63 @@
 <!-- Выпадающее окно уведомлений -->
 <div class="notification-dropdown" id="notificationDropdown">
     <div class="notification-header">
-        <span>📢 События в клубе</span>
+        <span>📢 События в клубе (всего: {{ recent_events.count }})</span>
         <button class="mark-read-btn" id="markAllReadBtn">✓ Все прочитаны</button>
     </div>
-    <div class="notification-list" id="notificationList">
-    {% for event in recent_events %}
-    <div class="notification-item {% if request.user not in event.read_by.all %}unread{% endif %}" data-event-id="{{ event.id }}">
-        <div class="d-flex align-items-center">
-            <div class="notification-icon" style="background: {% if event.event_type == 'user_registered' %}linear-gradient(135deg, #667eea, #764ba2){% elif event.event_type == 'book_added' %}linear-gradient(135deg, #f6c0c0, #d88c8c){% elif event.event_type == 'review_written' %}linear-gradient(135deg, #28a745, #20c997){% else %}linear-gradient(135deg, #ffc107, #fd7e14){% endif %}">
-                <i class="fas {% if event.event_type == 'user_registered' %}fa-user-plus{% elif event.event_type == 'book_added' %}fa-book{% elif event.event_type == 'review_written' %}fa-comment{% else %}fa-heart{% endif %}"></i>
-            </div>
-            <div class="notification-content">
-                <div class="notification-text">
-                    <strong>{{ event.user.get_full_name|default:event.user.username }}</strong>
-                    {{ event.get_event_type_display|lower }}
-                    {% if event.target %}
-                        {% if event.target_id and event.event_type != 'user_registered' %}
-                            "<a href="{% url 'books:book_detail' event.target_id %}" class="text-decoration-none fw-bold" style="color: #1645f0;">{{ event.target|truncatechars:30 }}</a>"
-                        {% else %}
-                            "{{ event.target|truncatechars:30 }}"
-                        {% endif %}
-                    {% endif %}
+    <div class="notification-list" id="notificationList" style="max-height: 400px; overflow-y: auto;">
+        {% for event in recent_events %}
+        <div class="notification-item {% if request.user not in event.read_by.all %}unread{% endif %}" data-event-id="{{ event.id }}">
+            <div class="d-flex align-items-center">
+                <div class="notification-icon" style="background:
+                    {% if event.event_type == 'user_registered' %}linear-gradient(135deg, #667eea, #764ba2)
+                    {% elif event.event_type == 'book_added' %}linear-gradient(135deg, #f6c0c0, #d88c8c)
+                    {% elif event.event_type == 'review_written' %}linear-gradient(135deg, #28a745, #20c997)
+                    {% elif event.event_type == 'book_favorited' %}linear-gradient(135deg, #ffc107, #fd7e14)
+                    {% elif event.event_type == 'rating_given' %}linear-gradient(135deg, #17a2b8, #138496)
+                    {% elif event.event_type == 'review_liked' %}linear-gradient(135deg, #20c997, #16a085)
+                    {% elif event.event_type == 'review_disliked' %}linear-gradient(135deg, #dc3545, #c82333)
+                    {% else %}linear-gradient(135deg, #6c5ce7, #5b4bc4)
+                    {% endif %}">
+                    <i class="fas
+                        {% if event.event_type == 'user_registered' %}fa-user-plus
+                        {% elif event.event_type == 'book_added' %}fa-book
+                        {% elif event.event_type == 'review_written' %}fa-comment
+                        {% elif event.event_type == 'book_favorited' %}fa-heart
+                        {% elif event.event_type == 'rating_given' %}fa-star
+                        {% elif event.event_type == 'review_liked' %}fa-thumbs-up
+                        {% elif event.event_type == 'review_disliked' %}fa-thumbs-down
+                        {% else %}fa-bell
+                        {% endif %}"></i>
                 </div>
-                <div class="notification-time" style="color: black;">{{ event.created_at|timesince }} назад</div>
+                <div class="notification-content">
+                    <div class="notification-text">
+                        <strong>{{ event.user.get_full_name|default:event.user.username }}</strong>
+                        {{ event.get_event_type_display|lower }}
+                        {% if event.target %}
+                            {% if event.target_id and event.event_type != 'user_registered' %}
+                                "<a href="{% url 'books:book_detail' event.target_id %}" class="text-decoration-none fw-bold" style="color: #1645f0;">{{ event.target|truncatechars:30 }}</a>"
+                            {% else %}
+                                "{{ event.target|truncatechars:30 }}"
+                            {% endif %}
+                        {% endif %}
+                        {% if event.target_user %}
+                            от <strong>{{ event.target_user.get_full_name|default:event.target_user.username }}</strong>
+                        {% endif %}
+                    </div>
+                    <div class="notification-time" style="color: black;">{{ event.created_at|timesince }} назад</div>
+                </div>
             </div>
         </div>
+        {% empty %}
+        <div class="notification-empty">
+            <i class="fas fa-bell-slash" style="font-size: 32px; margin-bottom: 10px; display: block;"></i>
+            Пока нет событий
+        </div>
+        {% endfor %}
     </div>
-    {% empty %}
-    <div class="notification-empty">
-        <i class="fas fa-bell-slash" style="font-size: 32px; margin-bottom: 10px; display: block;"></i>
-        Пока нет событий
+    <div class="text-center p-2 border-top">
+        <small class="text-muted">Всего событий: {{ recent_events.count }}</small>
     </div>
-    {% endfor %}
-</div>
 </div>
 
 <!-- 2. ОБЛОЖКА С ФОНОВОЙ КАРТИНКОЙ -->
@@ -315,6 +339,49 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+    // Загрузка следующих событий
+const loadMoreBtn = document.getElementById('loadMoreEvents');
+if (loadMoreBtn) {
+    loadMoreBtn.addEventListener('click', function() {
+        const page = this.dataset.page;
+        const notificationList = document.getElementById('notificationList');
+
+        // Показываем индикатор загрузки
+        const loadingHtml = '<div class="text-center p-3" id="loadingIndicator"><div class="spinner-border spinner-border-sm text-primary" role="status"></div> Загрузка...</div>';
+        notificationList.insertAdjacentHTML('beforeend', loadingHtml);
+
+        fetch(`/users/load-more-events/?page=${page}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Убираем индикатор загрузки
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            if (loadingIndicator) loadingIndicator.remove();
+
+            if (data.html) {
+                // Добавляем новые события
+                notificationList.insertAdjacentHTML('beforeend', data.html);
+            }
+
+            // Обновляем кнопку
+            if (data.has_next) {
+                loadMoreBtn.dataset.page = data.next_page;
+                const remaining = (parseInt(page) * 10);
+                loadMoreBtn.innerHTML = `<i class="fas fa-arrow-down me-1"></i> Показать еще (${data.remaining || '...'} осталось)`;
+            } else {
+                loadMoreBtn.remove();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            if (loadingIndicator) loadingIndicator.remove();
+        });
+    });
+}
 });
 </script>
 {% endblock %}

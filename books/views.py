@@ -391,6 +391,25 @@ def book_detail(request, book_id):
     """Страница книги с оценками и рецензиями"""
     book = get_object_or_404(Book, id=book_id, is_active=True)
 
+    all_books = Book.objects.filter(is_active=True).annotate(
+        total_avg=(
+                          Avg('reviews__character_depth') +
+                          Avg('reviews__idea_reveal') +
+                          Avg('reviews__readability') +
+                          Avg('reviews__relevance') +
+                          Avg('reviews__overall_impression')
+                  ) / 5
+    ).order_by('-total_avg')
+
+    book_rank = None
+    for idx, b in enumerate(all_books, 1):
+        if b.id == book.id:
+            book_rank = idx
+            break
+
+    # Количество людей, добавивших книгу в избранное
+    favorites_count = book.favorited_by.count()
+
     club_status = book.is_club_book
 
     # Рецензии пользователя (если есть)
@@ -430,6 +449,8 @@ def book_detail(request, book_id):
 
     context = {
         'book': book,
+        'book_rank': book_rank,
+        'favorites_count': favorites_count,
         'club_status': club_status,
         'user_review': user_review,
         'user_has_reviewed': user_review is not None,
@@ -457,6 +478,7 @@ def add_review(request, book_id):
         # Сохраняем оценку
         if 'save_rating' in request.POST:
             if existing_review:
+                # Обновляем существующую оценку
                 existing_review.character_depth = request.POST.get('character_depth')
                 existing_review.idea_reveal = request.POST.get('idea_reveal')
                 existing_review.readability = request.POST.get('readability')
@@ -464,7 +486,16 @@ def add_review(request, book_id):
                 existing_review.overall_impression = request.POST.get('overall_impression')
                 existing_review.save()
                 messages.success(request, '✅ Оценка сохранена!')
+
+                # 👇 СОБЫТИЕ: обновление оценки
+                ClubEvent.objects.create(
+                    event_type='rating_given',
+                    user=request.user,
+                    target=book.title,
+                    target_id=book.id,
+                )
             else:
+                # Создаем новую оценку
                 Review.objects.create(
                     book=book,
                     user=request.user,
@@ -477,6 +508,14 @@ def add_review(request, book_id):
                 )
                 messages.success(request, '✅ Оценка сохранена!')
 
+                # 👇 СОБЫТИЕ: новая оценка
+                ClubEvent.objects.create(
+                    event_type='rating_given',
+                    user=request.user,
+                    target=book.title,
+                    target_id=book.id,
+                )
+
             return redirect('books:book_detail', book_id=book.id)
 
         # Сохраняем рецензию
@@ -484,11 +523,22 @@ def add_review(request, book_id):
             comment = request.POST.get('comment', '').strip()
 
             if existing_review:
+                # Обновляем существующую рецензию
                 existing_review.comment = comment
                 existing_review.is_edited = True
                 existing_review.save()
                 messages.success(request, '✅ Рецензия обновлена!')
+
+                # 👇 СОБЫТИЕ: обновление рецензии (опционально)
+                if comment:
+                    ClubEvent.objects.create(
+                        event_type='review_written',
+                        user=request.user,
+                        target=book.title,
+                        target_id=book.id,
+                    )
             else:
+                # Создаем новую рецензию
                 Review.objects.create(
                     book=book,
                     user=request.user,
@@ -501,14 +551,14 @@ def add_review(request, book_id):
                 )
                 messages.success(request, '✅ Рецензия опубликована!')
 
-
-            if comment:
-                ClubEvent.objects.create(
-                    event_type='review_written',
-                    user=request.user,
-                    target=book.title,
-                    target_id=book.id,
-                )
+                # 👇 СОБЫТИЕ: новая рецензия
+                if comment:
+                    ClubEvent.objects.create(
+                        event_type='review_written',
+                        user=request.user,
+                        target=book.title,
+                        target_id=book.id,
+                    )
 
             return redirect('books:book_detail', book_id=book.id)
 
@@ -589,6 +639,10 @@ def toggle_review_reaction(request, review_id):
     review = get_object_or_404(Review, id=review_id)
     reaction = request.POST.get('reaction')  # 'like' или 'dislike'
 
+    # Запрещаем оценивать свою рецензию
+    if review.user == request.user:
+        return JsonResponse({'error': 'Нельзя оценивать свою рецензию'}, status=400)
+
     if reaction == 'like':
         if request.user in review.likes.all():
             review.likes.remove(request.user)
@@ -597,6 +651,17 @@ def toggle_review_reaction(request, review_id):
             review.likes.add(request.user)
             review.dislikes.remove(request.user)  # убираем дизлайк если был
             user_reaction = 'like'
+
+            # 👇 СОБЫТИЕ: лайк на рецензию
+            from users.models import ClubEvent
+            ClubEvent.objects.create(
+                event_type='review_liked',
+                user=request.user,
+                target=f"рецензию на книгу {review.book.title}",
+                target_id=review.book.id,
+                target_user=review.user,
+            )
+
     elif reaction == 'dislike':
         if request.user in review.dislikes.all():
             review.dislikes.remove(request.user)
@@ -605,13 +670,24 @@ def toggle_review_reaction(request, review_id):
             review.dislikes.add(request.user)
             review.likes.remove(request.user)  # убираем лайк если был
             user_reaction = 'dislike'
+
+            # 👇 СОБЫТИЕ: дизлайк на рецензию
+            from users.models import ClubEvent
+            ClubEvent.objects.create(
+                event_type='review_disliked',
+                user=request.user,
+                target=f"рецензию на книгу {review.book.title}",
+                target_id=review.book.id,
+                target_user=review.user,
+            )
+
     else:
         return JsonResponse({'error': 'Invalid reaction'}, status=400)
 
     # Собираем данные для аватарок (только если есть лайки)
     likers_data = []
-    if review.likes_count > 0:
-        for liker in review.last_likers:
+    if review.likes.count() > 0:
+        for liker in review.likes.all().order_by('-id')[:4]:
             likers_data.append({
                 'avatar_url': liker.avatar.url if liker.avatar else None,
                 'username': liker.username,
@@ -620,12 +696,11 @@ def toggle_review_reaction(request, review_id):
 
     return JsonResponse({
         'success': True,
-        'likes_count': review.likes_count,
-        'dislikes_count': review.dislikes_count,
+        'likes_count': review.likes.count(),
+        'dislikes_count': review.dislikes.count(),
         'likers': likers_data,
         'user_reaction': user_reaction,
     })
-
 
 
 

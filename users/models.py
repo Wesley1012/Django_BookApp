@@ -189,21 +189,19 @@ class ClubEvent(models.Model):
         ('book_added', 'Добавлена книга'),
         ('review_written', 'Написана рецензия'),
         ('book_favorited', 'Книга добавлена в избранное'),
+        ('rating_given', 'Поставил оценку книге'),
+        ('review_liked', 'Оценил рецензию'),
+        ('review_disliked', 'Отметил рецензию'),
     ]
 
     event_type = models.CharField(max_length=50, choices=EVENT_TYPES)
     user = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='events')
     target = models.CharField(max_length=255, blank=True, null=True)
     target_id = models.IntegerField(blank=True, null=True)
-    target_url = models.CharField(max_length=500, blank=True, null=True)
+    target_user = models.ForeignKey('users.User', on_delete=models.SET_NULL, null=True, blank=True,
+                                    related_name='targeted_events')
     created_at = models.DateTimeField(auto_now_add=True)
-
-    # 👇 ManyToMany к вашей кастомной модели User
-    read_by = models.ManyToManyField(
-        'users.User',
-        related_name='read_events',
-        blank=True
-    )
+    read_by = models.ManyToManyField('users.User', related_name='read_events', blank=True)
 
     class Meta:
         ordering = ['-created_at']

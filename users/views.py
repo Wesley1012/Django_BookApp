@@ -266,12 +266,9 @@ def user_profile(request, user_id):
 
 def home(request):
     if request.user.is_authenticated:
-        recent_events = ClubEvent.objects.all().order_by('-created_at')[:10]
-
-        # Количество непрочитанных для текущего пользователя
-        unread_count = ClubEvent.objects.exclude(
-            read_by=request.user
-        ).count()
+        # Все события для отображения (без пагинации)
+        recent_events = ClubEvent.objects.all().order_by('-created_at')
+        unread_count = ClubEvent.objects.exclude(read_by=request.user).count()
     else:
         recent_events = []
         unread_count = 0
@@ -338,28 +335,40 @@ def edit_profile(request):
 
 
 def members_list(request):
-    from django.db.models import Count, Q
+    from django.db.models import Count, Q, Sum
     from django.http import JsonResponse
     from django.template.loader import render_to_string
-    from books.models import Review
-    
+    from books.models import Review, Book, BookSubmission
+
     User = get_user_model()
-    
-    # Получаем параметры сортировки
+
     sort_by = request.GET.get('sort', 'date_joined')
     order = request.GET.get('order', 'desc')
-    
-    # Получаем всех пользователей
+
     users = User.objects.all()
-    
+
     # Собираем статистику
     user_stats = []
     for user in users:
-        # Количество одобренных предложок
+        # Количество книг в ТОПе (которые добавил пользователь и они в ТОПе)
+        books_in_top_count = Book.objects.filter(
+            submission__submitted_by=user,
+            is_active=True
+        ).count()
+
+        reviews_with_text_count = Review.objects.filter(
+            user=user
+        ).exclude(
+            comment__isnull=True
+        ).exclude(
+            comment__exact=''
+        ).count()
+
+        favorite_books_count = user.favorite_books.count()
+
         approved_submissions_count = user.booksubmission_set.filter(status='approved').count()
-        
-        # Количество ОЦЕНЕННЫХ книг (где есть хотя бы одна оценка)
-        reviews_count = Review.objects.filter(
+
+        rated_books_count = Review.objects.filter(
             user=user
         ).filter(
             Q(character_depth__isnull=False) |
@@ -368,44 +377,32 @@ def members_list(request):
             Q(relevance__isnull=False) |
             Q(overall_impression__isnull=False)
         ).count()
-        
-        # Количество избранных книг
-        favorite_books_count = user.favorite_books.count()
-        
-        # Количество оценок из предложок (старое)
-        total_ratings_count = 0
-        approved_submissions = user.booksubmission_set.filter(status='approved', want_rating=True)
-        for submission in approved_submissions:
-            ratings = [
-                submission.plot_rating,
-                submission.characters_rating,
-                submission.style_rating,
-                submission.originality_rating,
-                submission.impression_rating
-            ]
-            total_ratings_count += sum(1 for r in ratings if r > 0)
-        
+
         user_stats.append({
             'user': user,
             'approved_submissions_count': approved_submissions_count,
-            'reviews_count': reviews_count,  # Теперь это количество ОЦЕНЕННЫХ книг
+            'books_in_top_count': books_in_top_count,  # 👈 НОВЫЙ СТОЛБЕЦ
+            'reviews_with_text_count': reviews_with_text_count,  # 👈 НОВЫЙ СТОЛБЕЦ
+            'rated_books_count': rated_books_count,
             'favorite_books_count': favorite_books_count,
-            'total_ratings_count': total_ratings_count,
         })
-    
+
     # СОРТИРОВКА
     if sort_by == 'username':
         user_stats.sort(key=lambda x: x['user'].username.lower(), reverse=(order == 'desc'))
     elif sort_by == 'date_joined':
         user_stats.sort(key=lambda x: x['user'].date_joined, reverse=(order == 'desc'))
+    elif sort_by == 'books_in_top':
+        user_stats.sort(key=lambda x: x['books_in_top_count'], reverse=(order == 'desc'))
+    elif sort_by == 'reviews_with_text':
+        user_stats.sort(key=lambda x: x['reviews_with_text_count'], reverse=(order == 'desc'))
     elif sort_by == 'approved_submissions':
         user_stats.sort(key=lambda x: x['approved_submissions_count'], reverse=(order == 'desc'))
-    elif sort_by == 'reviews':
-        user_stats.sort(key=lambda x: x['reviews_count'], reverse=(order == 'desc'))
+    elif sort_by == 'rated_books':
+        user_stats.sort(key=lambda x: x['rated_books_count'], reverse=(order == 'desc'))
     elif sort_by == 'favorites':
         user_stats.sort(key=lambda x: x['favorite_books_count'], reverse=(order == 'desc'))
-    
-    # Если это AJAX запрос - возвращаем только таблицу
+
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         html = render_to_string('users/members_list.html', {
             'user_stats': user_stats,
@@ -414,14 +411,13 @@ def members_list(request):
             'ajax': True,
         }, request=request)
         return JsonResponse({'html': html})
-    
-    # Обычный запрос - полная страница
+
     context = {
         'user_stats': user_stats,
         'sort_by': sort_by,
         'order': order,
     }
-    
+
     return render(request, 'users/members_list.html', context)
 
 @login_required

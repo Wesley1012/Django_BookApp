@@ -368,9 +368,6 @@
                                         <span class="ms-2 text-primary">
                                             {{ review.total_score|floatformat:1 }}/10
                                         </span>
-                                        {% if review.is_edited %}
-                                        <span class="badge bg-warning ms-2">ред.</span>
-                                        {% endif %}
                                     </div>
                                 </div>
                                 <small class="text-muted">{{ review.created_at|date:"d.m.Y" }}</small>

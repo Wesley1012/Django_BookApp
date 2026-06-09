@@ -165,9 +165,23 @@
                         <div>
                             <h1 class="card-title">{{ book.title }}</h1>
                             <h4 class="card-subtitle text-muted mb-3">{{ book.author }}</h4>
-                            {% if book.genre %}
-                            <span class="badge" style="background: #d88c8c;">{{ book.get_genre_display }}</span>
-                            {% endif %}
+                            <div class="d-flex flex-wrap gap-2 mb-3">
+                                {% if book.genre %}
+                                <span class="badge" style="background: #d88c8c;">{{ book.get_genre_display }}</span>
+                                {% endif %}
+
+                                <!-- Место в ТОПе -->
+                                {% if book_rank %}
+                                <span class="badge" style="background: #6c5ce7; color: white;">
+                                    <i class="fas fa-trophy me-1"></i> #{{ book_rank }} в ТОПе
+                                </span>
+                                {% endif %}
+
+                                <!-- Счетчик избранных -->
+                                <span class="badge" style="background: #e74c3c; color: white;">
+                                    <i class="fas fa-heart me-1"></i> {{ favorites_count }} в избранном
+                                </span>
+                            </div>
                         </div>
                         <div class="d-flex gap-2">
                             {% if book.is_club_book %}
@@ -356,7 +370,7 @@
                                     {% if review.user == request.user %}<span class="badge bg-info ms-2">Это вы</span>{% endif %}
                                     {% if review.is_from_submission %}<span class="submission-badge">из предложки</span>{% endif %}
                                 </h5>
-                                <div class="text-muted small">{% if review.has_rating %}Оценка: <strong>{{ review.total_score|floatformat:1 }}/10</strong>{% endif %}{% if review.is_edited %} <span class="badge bg-warning ms-2">ред.</span>{% endif %}</div>
+                                <div class="text-muted small">{% if review.has_rating %}Оценка: <strong>{{ review.total_score|floatformat:1 }}/10</strong>{% endif %}</div>
                             </div>
                             <small class="text-muted">{{ review.created_at|date:"d.m.Y" }}</small>
                         </div>

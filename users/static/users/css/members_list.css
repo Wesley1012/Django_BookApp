@@ -1,7 +1,7 @@
    /* Стиль для обложки как в home */
     .members-cover {
         position: relative;
-        height: 400px;
+        height: 800px;
         background-image: url('https://optim.tildacdn.pub/tild3464-3531-4164-b230-356263373862/-/format/webp/photo_2025-11-29_18-.jpg.webp');
         background-size: cover;
         background-position: center;

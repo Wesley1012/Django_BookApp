@@ -16,6 +16,7 @@ urlpatterns = [
     path('avatar/delete/', views.delete_avatar, name='delete_avatar'),
     path('mark-events-read/', views.mark_events_read, name='mark_events_read'),
 
+
 ]
 
 
