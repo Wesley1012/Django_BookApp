@@ -299,7 +299,7 @@ def edit_profile(request):
 
             # Обработка обрезанного аватара (base64)
             cropped_avatar = request.POST.get('cropped_avatar', '')
-            if cropped_avatar and cropped_avatar.startswith('data:image'):
+            if cropped_avatar and cropped_avatar.startswith('data:images'):
                 try:
                     # Извлекаем base64 данные
                     format, imgstr = cropped_avatar.split(';base64,')
