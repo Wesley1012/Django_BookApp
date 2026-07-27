@@ -92,6 +92,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
+    'core.middleware.RateLimitMiddleware',
 ]
 
 ROOT_URLCONF = 'bookapp.urls'
@@ -211,4 +212,40 @@ EMAIL_USE_TLS = True  # или EMAIL_USE_SSL = True для порта 465
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL")
-SERVER_EMAIL = os.getenv("SERVER_EMAIL")
+SERVER_EMAIL = os.getenv("SERVER_EMAIL")# settings.py
+
+# Redis настройки
+REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
+
+# Кэширование (для django-redis)
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': REDIS_URL,
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}
+
+# Настройки лимитера
+RATE_LIMIT_CONFIG = {
+    'DEFAULT': {'requests': 30, 'window': 30},  # 60 запросов в минуту
+    'LIMITS': {
+        '/': {'requests': 10, 'window': 20},      # Главная: 20 за 10 сек
+        '/books/top/': {'requests': 10, 'window': 5},  # ТОП: 10 за 5 сек
+        '/books/submit/': {'requests': 5, 'window': 30},  # Предложка: 5 за 30 сек
+        '/api/': {'requests': 30, 'window': 60},  # API: 30 в минуту
+    },
+    'EXCLUDED_PATHS': [
+        '/health',
+        '/favicon.ico',
+        '/static/',
+        '/media/',
+        '/admin/',
+        '/robots.txt',
+        '/sitemap.xml',
+    ]
+}
+
+
