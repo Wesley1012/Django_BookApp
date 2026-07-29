@@ -10,8 +10,26 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Count, Avg, F, Q
 from django.views.decorators.http import require_POST
 from django.contrib.admin.views.decorators import staff_member_required
+from django.core.cache import cache
+import hashlib
+import json
+import time
 
 User = get_user_model()
+
+
+def clear_top_books_cache():
+    """Очищает все кеши ТОПа"""
+
+    # Удаляем все ключи, начинающиеся с "top_books_"
+    # Используем Redis для поиска по шаблону
+    from django_redis import get_redis_connection
+    redis = get_redis_connection("default")
+
+    # Находим все ключи
+    keys = redis.keys("top_books_*")
+    if keys:
+        redis.delete(*keys)
 
 @login_required
 def submit_book(request):
@@ -34,7 +52,7 @@ def submit_book(request):
             submission.save()
             form.save_m2m()
 
-            messages.success(request, '✅ Книга успешно предложена! Ожидайте проверки администратором.')
+            messages.success(request, 'Книга успешно предложена! Ожидайте проверки администратором.')
             return redirect('home')
         else:
             messages.error(request, '❌ Пожалуйста, исправьте ошибки в форме.')
@@ -108,7 +126,7 @@ def edit_submission(request, submission_id):
                             defaults={'note': 'Добавлено при предложке книги'}
                         )
 
-                    # 👇 ДОБАВЛЯЕМ СОБЫТИЕ (ПРАВИЛЬНОЕ МЕСТО!)
+                    # ДОБАВЛЯЕМ СОБЫТИЕ
                     ClubEvent.objects.create(
                         event_type='book_added',
                         user=submission.submitted_by,
@@ -116,9 +134,9 @@ def edit_submission(request, submission_id):
                         is_read=False
                     )
 
-                    messages.success(request, '✅ Книга одобрена и добавлена в ТОП!')
+                    messages.success(request, 'Книга одобрена и добавлена в ТОП!')
                 else:
-                    messages.info(request, 'ℹ️ Книга уже в ТОПе.')
+                    messages.info(request, 'Книга уже в ТОПе.')
 
             elif action == 'reject':
                 submission.status = 'rejected'
@@ -141,7 +159,7 @@ def edit_submission(request, submission_id):
                 saved_submission.impression_rating = 0
 
             saved_submission.save()
-            messages.success(request, '💾 Изменения сохранены!')
+            messages.success(request, 'Изменения сохранены!')
             return redirect('books:admin_submissions')
 
     else:
@@ -211,7 +229,9 @@ def approve_submission(request, submission_id):
             target_id=book.id,
         )
 
-    messages.success(request, f'✅ Книга "{submission.title}" одобрена!')
+    clear_top_books_cache()
+
+    messages.success(request, f'Книга "{submission.title}" одобрена!')
     return redirect('books:admin_submissions')
 
 
@@ -226,8 +246,29 @@ def reject_submission(request, submission_id):
     return redirect('books:admin_submissions')
 
 
-
 def top_books(request):
+    # Создаем уникальный ключ на основе GET параметров
+    params = {
+        'sort': request.GET.get('sort', 'total'),
+        'order': request.GET.get('order', 'desc'),
+        'status': request.GET.get('status', 'all'),
+        'rating_type': request.GET.get('rating_type', 'all'),
+        'search': request.GET.get('search', ''),
+    }
+
+    # Создаем хеш ключа для кеша
+    key_string = json.dumps(params, sort_keys=True)
+    cache_key = f"top_books_{hashlib.md5(key_string.encode()).hexdigest()}"
+
+    # Пробуем получить данные из кеша
+    cached_context = cache.get(cache_key)
+
+    if cached_context is not None:
+        response = render(request, 'books/top_books.html', cached_context)
+        response['X-Cache-Status'] = 'HIT'
+        return response
+
+    # --- ВАШ СУЩЕСТВУЮЩИЙ КОД ---
     books = Book.objects.filter(is_active=True).prefetch_related('reviews')
 
     # ПОИСК
@@ -253,14 +294,11 @@ def top_books(request):
 
     # ФИЛЬТР ПО ТИПУ РЕЙТИНГА
     rating_type = request.GET.get('rating_type', 'all')
-
-    # Получаем всех пользователей с is_staff
     staff_users = User.objects.filter(is_staff=True)
     regular_users = User.objects.filter(is_staff=False)
 
-    # Аннотации в зависимости от типа рейтинга
+    # АННОТАЦИИ
     if rating_type == 'staff':
-        # Только оценки персонала
         books = books.annotate(
             reviews_count=Count('reviews', filter=Q(
                 reviews__user__in=staff_users,
@@ -285,7 +323,6 @@ def top_books(request):
             avg_impression=Avg('reviews__overall_impression', filter=Q(reviews__user__in=staff_users)),
         )
     elif rating_type == 'users':
-        # Только оценки обычных пользователей
         books = books.annotate(
             reviews_count=Count('reviews', filter=Q(
                 reviews__user__in=regular_users,
@@ -310,7 +347,6 @@ def top_books(request):
             avg_impression=Avg('reviews__overall_impression', filter=Q(reviews__user__in=regular_users)),
         )
     else:
-        # Все оценки
         books = books.annotate(
             reviews_count=Count('reviews', filter=Q(
                 Q(reviews__character_depth__isnull=False) |
@@ -326,25 +362,19 @@ def top_books(request):
             avg_impression=Avg('reviews__overall_impression'),
         )
 
-    # Общий балл
+    # ОБЩИЙ БАЛЛ
     books = books.annotate(
         total_avg=(
                           F('avg_character') + F('avg_idea') + F('avg_readability') +
                           F('avg_relevance') + F('avg_impression')
                   ) / 5
     )
-    # Фильтрация по типу рейтинга
-    if rating_type == 'staff':
-        # Только книги, у которых есть оценки от персонала
-        books = books.filter(reviews_count__gt=0)
-    elif rating_type == 'users':
-        # Только книги, у которых есть оценки от читателей
-        books = books.filter(reviews_count__gt=0)
-    else:  # 'all'
-        # Все книги (включая без оценок)
-        pass  # Не фильтруем
 
-    # Сортировка
+    # Фильтрация по типу рейтинга
+    if rating_type in ['staff', 'users']:
+        books = books.filter(reviews_count__gt=0)
+
+    # СОРТИРОВКА
     sort_by = request.GET.get('sort', 'total')
     order = request.GET.get('order', 'desc')
     order_prefix = '' if order == 'asc' else '-'
@@ -362,6 +392,7 @@ def top_books(request):
     }
     sort_field = sort_fields.get(sort_by, 'total_avg')
     books = books.order_by(f'{order_prefix}{sort_field}')
+
 
     context = {
         'books': books,
@@ -385,7 +416,12 @@ def top_books(request):
         'rating_type': rating_type,
     }
 
-    return render(request, 'books/top_books.html', context)
+    # СОХРАНЯЕМ В КЕШ (5 минут)
+    cache.set(cache_key, context, 300)
+
+    response = render(request, 'books/top_books.html', context)
+    response['X-Cache-Status'] = 'MISS'
+    return response
 
 def book_detail(request, book_id):
     """Страница книги с оценками и рецензиями"""
@@ -485,7 +521,7 @@ def add_review(request, book_id):
                 existing_review.relevance = request.POST.get('relevance')
                 existing_review.overall_impression = request.POST.get('overall_impression')
                 existing_review.save()
-                messages.success(request, '✅ Оценка сохранена!')
+                messages.success(request, 'Оценка сохранена!')
 
                 # 👇 СОБЫТИЕ: обновление оценки
                 ClubEvent.objects.create(
@@ -506,7 +542,7 @@ def add_review(request, book_id):
                     overall_impression=request.POST.get('overall_impression'),
                     comment=''
                 )
-                messages.success(request, '✅ Оценка сохранена!')
+                messages.success(request, 'Оценка сохранена!')
 
                 # 👇 СОБЫТИЕ: новая оценка
                 ClubEvent.objects.create(
@@ -515,6 +551,8 @@ def add_review(request, book_id):
                     target=book.title,
                     target_id=book.id,
                 )
+
+            clear_top_books_cache()
 
             return redirect('books:book_detail', book_id=book.id)
 
@@ -527,7 +565,7 @@ def add_review(request, book_id):
                 existing_review.comment = comment
                 existing_review.is_edited = True
                 existing_review.save()
-                messages.success(request, '✅ Рецензия обновлена!')
+                messages.success(request, 'Рецензия обновлена!')
 
                 # 👇 СОБЫТИЕ: обновление рецензии (опционально)
                 if comment:
@@ -549,7 +587,7 @@ def add_review(request, book_id):
                     relevance=None,
                     overall_impression=None
                 )
-                messages.success(request, '✅ Рецензия опубликована!')
+                messages.success(request, 'Рецензия опубликована!')
 
                 # 👇 СОБЫТИЕ: новая рецензия
                 if comment:
@@ -559,6 +597,8 @@ def add_review(request, book_id):
                         target=book.title,
                         target_id=book.id,
                     )
+
+            clear_top_books_cache()
 
             return redirect('books:book_detail', book_id=book.id)
 
@@ -579,7 +619,9 @@ def delete_rating(request, book_id):
         review.relevance = None
         review.overall_impression = None
         review.save()
-        messages.success(request, '✅ Оценки удалены! Рецензия сохранена.')
+        messages.success(request, 'Оценки удалены! Рецензия сохранена.')
+
+    clear_top_books_cache()
 
     return redirect('books:book_detail', book_id=book.id)
 
@@ -593,7 +635,9 @@ def delete_comment(request, book_id):
         review = get_object_or_404(Review, book=book, user=request.user)
         review.comment = ''
         review.save()
-        messages.success(request, '✅ Рецензия удалена! Оценки сохранены.')
+        messages.success(request, 'Рецензия удалена! Оценки сохранены.')
+
+    clear_top_books_cache()
 
     return redirect('books:book_detail', book_id=book.id)
 

@@ -83,6 +83,7 @@ THUMBNAIL_PROCESSORS = (
 ) + thumbnail_settings.THUMBNAIL_PROCESSORS
 
 MIDDLEWARE = [
+    'django.middleware.cache.UpdateCacheMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',  ###
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -93,6 +94,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
     'core.middleware.RateLimitMiddleware',
+    'django.middleware.cache.FetchFromCacheMiddleware'
 ]
 
 ROOT_URLCONF = 'bookapp.urls'
@@ -212,40 +214,84 @@ EMAIL_USE_TLS = True  # или EMAIL_USE_SSL = True для порта 465
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL")
-SERVER_EMAIL = os.getenv("SERVER_EMAIL")# settings.py
+SERVER_EMAIL = os.getenv("SERVER_EMAIL")
 
 # Redis настройки
-REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
 
-# Кэширование (для django-redis)
 CACHES = {
     'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': REDIS_URL,
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': os.path.join(BASE_DIR, 'cache'),
+        'TIMEOUT': 300,
         'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'MAX_ENTRIES': 1000
         }
     }
 }
 
-# Настройки лимитера
-RATE_LIMIT_CONFIG = {
-    'DEFAULT': {'requests': 30, 'window': 30},  # 60 запросов в минуту
-    'LIMITS': {
-        '/': {'requests': 10, 'window': 20},      # Главная: 20 за 10 сек
-        '/books/top/': {'requests': 10, 'window': 5},  # ТОП: 10 за 5 сек
-        '/books/submit/': {'requests': 5, 'window': 30},  # Предложка: 5 за 30 сек
-        '/api/': {'requests': 30, 'window': 60},  # API: 30 в минуту
-    },
-    'EXCLUDED_PATHS': [
-        '/health',
-        '/favicon.ico',
-        '/static/',
-        '/media/',
-        '/admin/',
-        '/robots.txt',
-        '/sitemap.xml',
-    ]
-}
+# Настройки кеширования страниц
+CACHE_MIDDLEWARE_ALIAS = 'default'
+CACHE_MIDDLEWARE_SECONDS = 300  # 5 минут
+CACHE_MIDDLEWARE_KEY_PREFIX = 'site_cache'
 
+
+# REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
+#
+# # Кэширование (для django-redis)
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+#         'LOCATION': 'unique-snowflake',
+#     }
+# }
+#
+# CACHE_SETTINGS = {
+#     'TOP_BOOKS_TIMEOUT': 300,  # 5 минут
+#     'BOOK_DETAIL_TIMEOUT': 600,  # 10 минут
+# }
+#
+# # Настройки лимитера
+# RATE_LIMIT_CONFIG = {
+#     'DEFAULT': {'requests': 30, 'window': 30},  # 60 запросов в минуту
+#     'LIMITS': {
+#         '/': {'requests': 10, 'window': 20},      # Главная: 20 за 10 сек
+#         '/books/top/': {'requests': 10, 'window': 20},  # ТОП: 10 за 5 сек
+#         '/books/submit/': {'requests': 5, 'window': 30},  # Предложка: 5 за 30 сек
+#         # '/api/': {'requests': 30, 'window': 60},  # API: 30 в минуту
+#         '/books/book/': {'requests': 10, 'window': 60},
+#
+#         # ДИНАМИЧЕСКИЙ ПУТЬ ДЛЯ РЕАКЦИЙ НА РЕЦЕНЗИИ
+#         're:/books/review/[0-9]+/react/': {'requests': 10, 'window': 60},
+#
+#         # Другие динамические пути
+#         're:/books/book/[0-9]+/favorite/': {'requests': 2, 'window': 30},
+#         're:/books/book/[0-9]+/review/': {'requests': 10, 'window': 30},
+#     },
+#     'EXCLUDED_PATHS': [
+#         '/health',
+#         '/favicon.ico',
+#         '/static/',
+#         '/media/',
+#         '/admin/',
+#         '/robots.txt',
+#         '/sitemap.xml',
+#     ]
+# }
+
+
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     'handlers': {
+#         'console': {
+#             'class': 'logging.StreamHandler',
+#         },
+#     },
+#     'loggers': {
+#         'django.db.backends': {
+#             'handlers': ['console'],
+#             'level': 'DEBUG',
+#         },
+#     },
+# }
 

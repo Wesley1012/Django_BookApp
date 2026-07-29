@@ -1,68 +1,61 @@
-# core/rate_limiter.py
-
-import random
-import logging
-from time import time
 from django.core.cache import cache
-from django.conf import settings
+import random
+import time
+import logging
 
 logger = logging.getLogger(__name__)
 
 
 class RateLimiter:
-    """Лимитер запросов на основе Redis через Django Cache"""
+    """Лимитер запросов на основе Django Cache (работает с любым бэкендом)"""
 
     def __init__(self):
         self._cache = cache
         self._prefix = "rate_limiter"
 
-    def _get_key(self, endpoint: str, ip_address: str) -> str:
-        """Создает ключ для Redis"""
+    def _get_key(self, endpoint, ip_address):
         return f"{self._prefix}:{endpoint}:{ip_address}"
 
-    def is_limited(
-            self,
-            ip_address: str,
-            endpoint: str,
-            max_requests: int,
-            window_seconds: int,
-    ) -> bool:
-        """Проверяет, не превышен ли лимит запросов (синхронно)"""
-        key = self._get_key(endpoint, ip_address)
-        current_time = time()
-        window_start = current_time - window_seconds
+    def is_limited(self, ip_address, endpoint, max_requests, window_seconds):
+        """Проверяет, не превышен ли лимит запросов (работает с любым бэкендом)"""
+        try:
+            key = self._get_key(endpoint, ip_address)
+            current_time = time.time()
 
-        # Используем Redis через Django cache
-        from django_redis import get_redis_connection
-        redis = get_redis_connection("default")
+            # Получаем текущие данные
+            data = self._cache.get(key, {})
 
-        # Очищаем старые записи
-        redis.zremrangebyscore(key, 0, window_start)
+            # Очищаем старые записи
+            if data:
+                data = {k: v for k, v in data.items() if v > current_time - window_seconds}
 
-        # Получаем количество запросов в окне
-        count = redis.zcard(key)
+            # Проверяем лимит
+            if len(data) >= max_requests:
+                logger.warning(
+                    f"Rate limit exceeded: {ip_address} -> {endpoint} "
+                    f"({len(data)}/{max_requests} in {window_seconds}s)"
+                )
+                return True
 
-        # Если лимит превышен - блокируем
-        if count >= max_requests:
-            logger.warning(
-                f"Rate limit exceeded: {ip_address} -> {endpoint} "
-                f"({count}/{max_requests} in {window_seconds}s)"
-            )
-            return True
+            # Добавляем новый запрос
+            request_id = f"{current_time}-{random.randint(0, 100000)}"
+            data[request_id] = current_time
 
-        # Добавляем новый запрос
-        request_id = f"{time()}-{random.randint(0, 100000)}"
-        redis.zadd(key, {request_id: current_time})
-        redis.expire(key, window_seconds)
+            # Сохраняем в кэш
+            self._cache.set(key, data, timeout=window_seconds)
 
-        return False
+            return False
+
+        except Exception as e:
+            logger.error(f"Rate limiter error: {e}")
+            return False  # Если ошибка - пропускаем
 
 
-# Создаем синглтон
+# Синглтон
 _rate_limiter = None
 
 
-def get_rate_limiter() -> RateLimiter:
+def get_rate_limiter():
     global _rate_limiter
     if _rate_limiter is None:
         _rate_limiter = RateLimiter()
