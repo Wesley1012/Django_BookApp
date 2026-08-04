@@ -39,6 +39,20 @@ LOGIN_REDIRECT_URL = '/users/'
 LOGOUT_REDIRECT_URL = '/'
 LOGIN_URL = '/users/auth/login/'
 
+# SECURE_SSL_REDIRECT = True
+
+# Дополнительные настройки безопасности
+SESSION_COOKIE_SECURE = True #Перехват сессии
+CSRF_COOKIE_SECURE = True #CSRF-атаки
+SECURE_BROWSER_XSS_FILTER = True #XSS-атаки
+SECURE_CONTENT_TYPE_NOSNIFF = True #MIME-сниффинг
+SECURE_HSTS_SECONDS = 0 #HTTP-подмена
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
+# Если у вас Nginx за прокси
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 # Application definition
 
 INSTALLED_APPS = [
