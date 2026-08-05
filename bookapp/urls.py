@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.http import JsonResponse
 from django.urls import path, include
 from django.views.generic import TemplateView, RedirectView
 from users.views import home
@@ -13,6 +14,7 @@ urlpatterns = [
     path('home/', home, name='home'),
     path('books/', include('books.urls')),
     path('games/', include('games.urls')),
+    path('health/', lambda request: JsonResponse({'status': 'ok'}), name='health'),
 
 ]
 if settings.DEBUG:

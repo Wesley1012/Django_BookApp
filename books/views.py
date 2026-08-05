@@ -229,7 +229,7 @@ def approve_submission(request, submission_id):
             target_id=book.id,
         )
 
-    clear_top_books_cache()
+    # clear_top_books_cache()
 
     messages.success(request, f'Книга "{submission.title}" одобрена!')
     return redirect('books:admin_submissions')
@@ -552,7 +552,7 @@ def add_review(request, book_id):
                     target_id=book.id,
                 )
 
-            clear_top_books_cache()
+            # clear_top_books_cache()
 
             return redirect('books:book_detail', book_id=book.id)
 
@@ -598,7 +598,7 @@ def add_review(request, book_id):
                         target_id=book.id,
                     )
 
-            clear_top_books_cache()
+            # clear_top_books_cache()
 
             return redirect('books:book_detail', book_id=book.id)
 
@@ -621,7 +621,7 @@ def delete_rating(request, book_id):
         review.save()
         messages.success(request, 'Оценки удалены! Рецензия сохранена.')
 
-    clear_top_books_cache()
+    # clear_top_books_cache()
 
     return redirect('books:book_detail', book_id=book.id)
 
@@ -637,7 +637,7 @@ def delete_comment(request, book_id):
         review.save()
         messages.success(request, 'Рецензия удалена! Оценки сохранены.')
 
-    clear_top_books_cache()
+    # clear_top_books_cache()
 
     return redirect('books:book_detail', book_id=book.id)
 

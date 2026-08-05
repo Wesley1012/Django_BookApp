@@ -15,7 +15,7 @@ class RateLimitMiddleware:
         # Настройки лимитов
         self.limits = {
             '/': {'requests': 10, 'window': 30},
-            '/home/': {'requests': 5, 'window': 30},
+            '/home/': {'requests': 10, 'window': 30},
             '/books/top/': {'requests': 10, 'window': 30},
             '/books/submit/': {'requests': 5, 'window': 30},
             '/books/book/': {'requests': 15, 'window': 30},

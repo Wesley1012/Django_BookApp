@@ -42,16 +42,16 @@ LOGIN_URL = '/users/auth/login/'
 # SECURE_SSL_REDIRECT = True
 
 # Дополнительные настройки безопасности
-SESSION_COOKIE_SECURE = True #Перехват сессии
-CSRF_COOKIE_SECURE = True #CSRF-атаки
-SECURE_BROWSER_XSS_FILTER = True #XSS-атаки
-SECURE_CONTENT_TYPE_NOSNIFF = True #MIME-сниффинг
-SECURE_HSTS_SECONDS = 0 #HTTP-подмена
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
+# SESSION_COOKIE_SECURE = True #Перехват сессии
+# CSRF_COOKIE_SECURE = True #CSRF-атаки
+# SECURE_BROWSER_XSS_FILTER = True #XSS-атаки
+# SECURE_CONTENT_TYPE_NOSNIFF = True #MIME-сниффинг
+# SECURE_HSTS_SECONDS = 0 #HTTP-подмена
+# SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+# SECURE_HSTS_PRELOAD = True
 
 # Если у вас Nginx за прокси
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Application definition
 
@@ -97,7 +97,7 @@ THUMBNAIL_PROCESSORS = (
 ) + thumbnail_settings.THUMBNAIL_PROCESSORS
 
 MIDDLEWARE = [
-    'django.middleware.cache.UpdateCacheMiddleware',
+    # 'django.middleware.cache.UpdateCacheMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',  ###
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -108,7 +108,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
     'core.middleware.RateLimitMiddleware',
-    'django.middleware.cache.FetchFromCacheMiddleware'
+    # 'django.middleware.cache.FetchFromCacheMiddleware'
 ]
 
 ROOT_URLCONF = 'bookapp.urls'
@@ -232,21 +232,21 @@ SERVER_EMAIL = os.getenv("SERVER_EMAIL")
 
 # Redis настройки
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': os.path.join(BASE_DIR, 'cache'),
-        'TIMEOUT': 300,
-        'OPTIONS': {
-            'MAX_ENTRIES': 1000
-        }
-    }
-}
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+#         'LOCATION': os.path.join(BASE_DIR, 'cache'),
+#         'TIMEOUT': 300,
+#         'OPTIONS': {
+#             'MAX_ENTRIES': 1000
+#         }
+#     }
+# }
 
 # Настройки кеширования страниц
-CACHE_MIDDLEWARE_ALIAS = 'default'
-CACHE_MIDDLEWARE_SECONDS = 300  # 5 минут
-CACHE_MIDDLEWARE_KEY_PREFIX = 'site_cache'
+# CACHE_MIDDLEWARE_ALIAS = 'default'
+# CACHE_MIDDLEWARE_SECONDS = 300  # 5 минут
+# CACHE_MIDDLEWARE_KEY_PREFIX = 'site_cache'
 
 
 # REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
