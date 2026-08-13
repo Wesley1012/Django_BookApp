@@ -18,19 +18,6 @@ import time
 User = get_user_model()
 
 
-def clear_top_books_cache():
-    """Очищает все кеши ТОПа"""
-
-    # Удаляем все ключи, начинающиеся с "top_books_"
-    # Используем Redis для поиска по шаблону
-    from django_redis import get_redis_connection
-    redis = get_redis_connection("default")
-
-    # Находим все ключи
-    keys = redis.keys("top_books_*")
-    if keys:
-        redis.delete(*keys)
-
 @login_required
 def submit_book(request):
     """Пользователь предлагает книгу"""
@@ -229,7 +216,6 @@ def approve_submission(request, submission_id):
             target_id=book.id,
         )
 
-    # clear_top_books_cache()
 
     messages.success(request, f'Книга "{submission.title}" одобрена!')
     return redirect('books:admin_submissions')
@@ -523,7 +509,7 @@ def add_review(request, book_id):
                 existing_review.save()
                 messages.success(request, 'Оценка сохранена!')
 
-                # 👇 СОБЫТИЕ: обновление оценки
+                # СОБЫТИЕ: обновление оценки
                 ClubEvent.objects.create(
                     event_type='rating_given',
                     user=request.user,
@@ -544,7 +530,7 @@ def add_review(request, book_id):
                 )
                 messages.success(request, 'Оценка сохранена!')
 
-                # 👇 СОБЫТИЕ: новая оценка
+                # СОБЫТИЕ: новая оценка
                 ClubEvent.objects.create(
                     event_type='rating_given',
                     user=request.user,
@@ -552,7 +538,6 @@ def add_review(request, book_id):
                     target_id=book.id,
                 )
 
-            # clear_top_books_cache()
 
             return redirect('books:book_detail', book_id=book.id)
 
@@ -567,7 +552,7 @@ def add_review(request, book_id):
                 existing_review.save()
                 messages.success(request, 'Рецензия обновлена!')
 
-                # 👇 СОБЫТИЕ: обновление рецензии (опционально)
+                # СОБЫТИЕ: обновление рецензии (опционально)
                 if comment:
                     ClubEvent.objects.create(
                         event_type='review_written',
@@ -589,7 +574,7 @@ def add_review(request, book_id):
                 )
                 messages.success(request, 'Рецензия опубликована!')
 
-                # 👇 СОБЫТИЕ: новая рецензия
+                # СОБЫТИЕ: новая рецензия
                 if comment:
                     ClubEvent.objects.create(
                         event_type='review_written',
@@ -598,7 +583,6 @@ def add_review(request, book_id):
                         target_id=book.id,
                     )
 
-            # clear_top_books_cache()
 
             return redirect('books:book_detail', book_id=book.id)
 
@@ -621,7 +605,6 @@ def delete_rating(request, book_id):
         review.save()
         messages.success(request, 'Оценки удалены! Рецензия сохранена.')
 
-    # clear_top_books_cache()
 
     return redirect('books:book_detail', book_id=book.id)
 
@@ -637,7 +620,6 @@ def delete_comment(request, book_id):
         review.save()
         messages.success(request, 'Рецензия удалена! Оценки сохранены.')
 
-    # clear_top_books_cache()
 
     return redirect('books:book_detail', book_id=book.id)
 
@@ -696,7 +678,7 @@ def toggle_review_reaction(request, review_id):
             review.dislikes.remove(request.user)  # убираем дизлайк если был
             user_reaction = 'like'
 
-            # 👇 СОБЫТИЕ: лайк на рецензию
+            # СОБЫТИЕ: лайк на рецензию
             from users.models import ClubEvent
             ClubEvent.objects.create(
                 event_type='review_liked',
@@ -715,7 +697,7 @@ def toggle_review_reaction(request, review_id):
             review.likes.remove(request.user)  # убираем лайк если был
             user_reaction = 'dislike'
 
-            # 👇 СОБЫТИЕ: дизлайк на рецензию
+            # СОБЫТИЕ: дизлайк на рецензию
             from users.models import ClubEvent
             ClubEvent.objects.create(
                 event_type='review_disliked',
